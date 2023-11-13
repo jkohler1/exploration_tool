@@ -1,0 +1,52 @@
+// Display.scss
+
+.container {
+    padding: 1rem;
+
+    h1 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .layers-wrapper {
+        display: flex;
+        gap: 1rem;
+
+        .layer {
+            flex: 1;
+            border: 1px solid black;
+            padding: 0.5rem;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            height: 500px; // Adjust this as needed
+
+            &:first-child {
+                margin-right: 0.5rem;
+            }
+        }
+    }
+}
+
+
+.toolbar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    button {
+        padding: 0.5rem 1rem;
+        border: none;
+        background-color: #f5f5f5;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #e0e0e0;
+        }
+
+        &.active {
+            background-color: #d0d0d0;
+        }
+    }
+}
