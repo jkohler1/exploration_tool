@@ -20,8 +20,11 @@ function defineMappingLatentPhysical(filename,tileSize) {
           if (match) {
             const [, x, y] = match;
             physicalToLatent[x] = physicalToLatent[x] || {};
-            physicalToLatent[x][y] = { umap_x, umap_y };
-  
+            physicalToLatent[x][y] = {
+              filename,
+              umap_x: parseFloat(umap_x),
+              umap_y: parseFloat(umap_y),
+            };  
             latentToPhysical[umap_x] = latentToPhysical[umap_x] || {};
             latentToPhysical[umap_x][umap_y] = { x: parseInt(x*tileSize), y: parseInt(y*tileSize) }; //change with tile size 
           }
@@ -83,20 +86,27 @@ const Display = () => {
     useEffect(() => {
       if (latentTouchedData.length > 0 || physicalTouchedData.length > 0) {
         let tmpLatentTouchedData = latentTouchedData; // Utilisation de spread pour créer une nouvelle copie
-        let tmpPhysicalTouchedData = physicalTouchedData; // Utilisation de spread pour créer une nouvelle copie
-        let tmpLatentTouchedCoordinate = latentTouchedCoordinate; 
+        let tmpPhysicalTouchedData = physicalTouchedData
+
+        for (const elem of physicalTouchedData) {
+          const { x, y } = elem;
+          let real_x = x/metaData.tileSize
+          let real_y = y/metaData.tileSize
+          if (real_x in mappingLatentPhysical.physicalToLatent && real_y in mappingLatentPhysical.physicalToLatent[real_x]) {
+              tmpLatentTouchedData.push(mappingLatentPhysical.physicalToLatent[real_x][real_y])
+          }
+        }   
         for (const elem of latentTouchedData) {
           const { umap_x, umap_y } = elem;
           if (umap_x in mappingLatentPhysical.latentToPhysical && umap_y in mappingLatentPhysical.latentToPhysical[umap_x]) {
               tmpPhysicalTouchedData.push(mappingLatentPhysical.latentToPhysical[umap_x][umap_y]);
-              tmpLatentTouchedCoordinate[umap_x] = tmpLatentTouchedCoordinate[umap_x] || {};
-              tmpLatentTouchedCoordinate[umap_x][umap_y] = { umap_x, umap_y };
           }
-        }      
-        setLatentTouchedCoordinate(tmpLatentTouchedCoordinate);
+        }
+  
+        setLatentTouchedData(tmpLatentTouchedData)
         setPhysicalTouchedData(tmpPhysicalTouchedData);
       }
-    }, [latentTouchedData, physicalTouchedData]); // Dépendances : latentTouchedData et physicalTouchedData
+    }); // Dépendances : latentTouchedData et physicalTouchedData
     
     if(physicalTouchedData !== undefined && latentTouchedData !== undefined){
       return (
@@ -125,6 +135,7 @@ const Display = () => {
                     layerType={LAYERTYPE.PHYSICAL}
                     metaData={metaData}
                     generalData={generalData}
+                    mappingLatentPhysical={mappingLatentPhysical}
                 />
                 </div>
                 <div className="layer">
@@ -133,8 +144,6 @@ const Display = () => {
                      TOOLS = {TOOLS} 
                      latentTouchedData={latentTouchedData} 
                      setLatentTouchedData={setLatentTouchedData}
-                     latentTouchedCoordinate={latentTouchedCoordinate}
-                     setLatentTouchedCoordinate={setLatentTouchedCoordinate}
                      layerType={LAYERTYPE.LATENT}
                      metaData={metaData}
                      generalData={generalData}

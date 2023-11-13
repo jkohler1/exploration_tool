@@ -1,6 +1,7 @@
 import * as turf from '@turf/turf';
 
-export function getAllTilesInsideAnnotation(dimensions, updatedData,touchedData) {
+export function getAllTilesInsideAnnotation(dimensions, updatedData,touchedData,mappingLatentPhysical) {
+    console.log(mappingLatentPhysical)
     const tileSize = dimensions.tileSize;
     const imageWidth = dimensions.width;
     const imageHeight = dimensions.height;
@@ -19,8 +20,7 @@ export function getAllTilesInsideAnnotation(dimensions, updatedData,touchedData)
   
         const point = turf.point([centerX, centerY]);
   
-  
-        if (turf.booleanPointInPolygon(point, newFeature)) {
+        if (turf.booleanPointInPolygon(point, newFeature) && x in mappingLatentPhysical.physicalToLatent && y in mappingLatentPhysical.physicalToLatent[x]) {
           // Créez une clé unique pour la tuile touchée
           touchedTilesTmp.push({ x: x * tileSize, y: y * tileSize });
         }
@@ -29,20 +29,19 @@ export function getAllTilesInsideAnnotation(dimensions, updatedData,touchedData)
     return touchedTilesTmp;
   }
 
-  export function getAllPointsInsideAnnotation(layerData, updatedData) {
-    const pointsInsideAnnotation = [];
+  export function getAllPointsInsideAnnotation(layerData, updatedData,touchedData) {
     const newFeature = updatedData.features[updatedData.features.length - 1];
     for (const point of layerData) {
       const { umap_x, umap_y } = point;
       if (!isNaN(umap_x)) {
         const turfPoint = turf.point([umap_x, umap_y]);
         if (turf.booleanPointInPolygon(turfPoint, newFeature)) {
-            pointsInsideAnnotation.push(point);
+          touchedData.push(point);
         }
       }
     }
   
-    return pointsInsideAnnotation;
+    return touchedData;
   }
   
   export function loadData(filePath) {

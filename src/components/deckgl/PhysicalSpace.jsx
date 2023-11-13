@@ -12,7 +12,7 @@ import GeoJsonColorTileLayer from './layer/colorLayer';
 
 
 
-export default function PhysicalSpace({activeTool,TOOLS,physicalTouchedData,setPhysicalTouchedData,layerType,metaData,generalData}) {
+export default function PhysicalSpace({activeTool,TOOLS,physicalTouchedData,setPhysicalTouchedData,layerType,metaData,generalData,mappingLatentPhysical}) {
   const [editedData, setEditedData] = useState({
     type: 'FeatureCollection',
     features: []
@@ -28,7 +28,7 @@ export default function PhysicalSpace({activeTool,TOOLS,physicalTouchedData,setP
   useEffect(() => {
     if (metaData && generalData) {
       const mainlayer = MainTileLayerComponent({ metaData, generalData});
-      const editionLayer = EditableLayerComponent({ metaData,  activeTool, TOOLS,editedData, setEditedData, touchedData:physicalTouchedData, setTouchedData:setPhysicalTouchedData,layerType});
+      const editionLayer = EditableLayerComponent({ metaData,  activeTool, TOOLS,editedData, setEditedData, touchedData:physicalTouchedData, setTouchedData:setPhysicalTouchedData,layerType,mappingLatentPhysical});
       const geoJsonColorTileLayer = GeoJsonColorTileLayer({metaData,touchedData:physicalTouchedData,layerType})
       setMainLayer(mainlayer);
       setColorLayer(geoJsonColorTileLayer);

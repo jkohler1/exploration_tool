@@ -5,7 +5,7 @@ import EditableLayerComponent from './layer/editionLayer';
 import GeoJsonColorTileLayer from './layer/colorLayer';
 import {loadData} from '../../utils';
 
-export default function LatentSpace({activeTool,TOOLS,latentTouchedData,setLatentTouchedData,latentTouchedCoordinate,setLatentTouchedCoordinate,layerType,metaData,generalData }) {
+export default function LatentSpace({activeTool,TOOLS,latentTouchedData,setLatentTouchedData,layerType,metaData,generalData }) {
   const initialState = {
     longitude: 0,
     latitude: 0,
@@ -41,7 +41,7 @@ export default function LatentSpace({activeTool,TOOLS,latentTouchedData,setLaten
     if (generalData && currentZoomLevel && viewState && metaData) {
       loadData(generalData.MODEL_URL)
         .then(layerData => {
-          const mainLayerComponent = new MainLatentLayer({layerData});
+          const mainLayerComponent = new MainLatentLayer({layerData,latentTouchedData});
           setMainLayer(mainLayerComponent);
           const editionLayer = EditableLayerComponent({
             metaData,

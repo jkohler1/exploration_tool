@@ -13,15 +13,16 @@ function EditableLayerComponent({
   touchedData, 
   setTouchedData,
   layerType,
-  layerData
+  layerData,
+  mappingLatentPhysical
 }) {
   const onEdit = ({ updatedData }) => {
     if (updatedData.features.length > editedData.features.length) {
       if(layerType===LAYERTYPE.PHYSICAL){
-        let touchedTilesTmp = getAllTilesInsideAnnotation(metaData, updatedData,touchedData);
+        let touchedTilesTmp = getAllTilesInsideAnnotation(metaData, updatedData,touchedData,mappingLatentPhysical);
         setTouchedData(touchedTilesTmp);
       }else if(layerType===LAYERTYPE.LATENT){
-        let touchedTilesTmp = getAllPointsInsideAnnotation(layerData, updatedData);
+        let touchedTilesTmp = getAllPointsInsideAnnotation(layerData, updatedData,touchedData);
         setTouchedData(touchedTilesTmp);
       } 
       setEditedData(updatedData);
