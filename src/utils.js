@@ -1,14 +1,12 @@
 import * as turf from '@turf/turf';
 
-export function getAllTilesInsideAnnotation(dimensions, updatedData,touchedData,mappingLatentPhysical) {
-    console.log(mappingLatentPhysical)
-    const tileSize = dimensions.tileSize;
-    const imageWidth = dimensions.width;
-    const imageHeight = dimensions.height;
+export function getAllTilesInsideAnnotation(metaData, newFeature,dataManager) {
+    const tileSize = metaData.tileSize;
+    const imageWidth = metaData.width;
+    const imageHeight = metaData.height;
     const maxZoomLevel = 16;
-    const newFeature = updatedData.features[updatedData.features.length - 1];
   
-    let touchedTilesTmp = touchedData;
+    let touchedData = [];
     const zoom = maxZoomLevel;
   
     const tilesInX = Math.ceil(imageWidth / (tileSize * Math.pow(2, maxZoomLevel - zoom)));
@@ -20,17 +18,18 @@ export function getAllTilesInsideAnnotation(dimensions, updatedData,touchedData,
   
         const point = turf.point([centerX, centerY]);
   
-        if (turf.booleanPointInPolygon(point, newFeature) && x in mappingLatentPhysical.physicalToLatent && y in mappingLatentPhysical.physicalToLatent[x]) {
+        if (turf.booleanPointInPolygon(point, newFeature) && x in dataManager.mappingLatentPhysical.physicalToLatent && y in dataManager.mappingLatentPhysical.physicalToLatent[x]) {
           // Créez une clé unique pour la tuile touchée
-          touchedTilesTmp.push({ x: x * tileSize, y: y * tileSize });
+          touchedData.push({ x: x * tileSize, y: y * tileSize });
         }
       }
     }
-    return touchedTilesTmp;
+    return touchedData;
   }
 
-  export function getAllPointsInsideAnnotation(layerData, updatedData,touchedData) {
-    const newFeature = updatedData.features[updatedData.features.length - 1];
+  export function getAllPointsInsideAnnotation(dataManager, newFeature) {
+    const layerData = dataManager.model_data
+    let touchedData = []
     for (const point of layerData) {
       const { umap_x, umap_y } = point;
       if (!isNaN(umap_x)) {
@@ -40,7 +39,6 @@ export function getAllTilesInsideAnnotation(dimensions, updatedData,touchedData,
         }
       }
     }
-  
     return touchedData;
   }
   
@@ -66,3 +64,25 @@ export function getAllTilesInsideAnnotation(dimensions, updatedData,touchedData,
   }
   
 
+  function generateRandomColor() {
+    const randomColor = [
+      Math.floor(Math.random() * 256), // Rouge
+      Math.floor(Math.random() * 256), // Vert
+      Math.floor(Math.random() * 256)  // Bleu
+    ];
+  
+    return randomColor;
+  }
+  
+  
+  export function generateEmptyAnnotation(latentElem,physicalElem){
+    let newAnnotation = {
+      id:Date.now(),
+      name:"noName",
+      display:true,
+      color:generateRandomColor(),
+      latentTouched:latentElem,
+      physicalTouched:physicalElem
+    }
+    return newAnnotation
+  }

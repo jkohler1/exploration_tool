@@ -3,7 +3,8 @@ import PhysicalSpace from "./deckgl/PhysicalSpace";
 import LatentSpace from "./deckgl/LatentSpace";
 import './displays.scss'; 
 import TOOLS from '../enums/ToolsType'
-import LAYERTYPE from '../enums/LayerType'
+import {loadData} from '../utils';
+import TableComponent from './annotationTable'; // Assurez-vous d'ajuster le chemin
 function defineMappingLatentPhysical(filename,tileSize) {
     return fetch(filename)
       .then(response => response.text())
@@ -47,14 +48,21 @@ const Display = () => {
     const [metaData, setMetaData] = useState(null);
     const [generalData,setGeneralData] = useState({ROOT_URL,MODEL_URL,DZI_URL})
 
-    const [latentTouchedData, setLatentTouchedData] = useState([]);
-    const [latentTouchedCoordinate,setLatentTouchedCoordinate] = useState([]);
-    const [physicalTouchedData, setPhysicalTouchedData] = useState([]);
-    const [mappingLatentPhysical,setMappingLatentPhysical] = useState([])
+    const[dataManager,setDataManager] = useState({
+      model_name : "No name",
+      model_data : [],
+      mappingLatentPhysical : [],
+      annotation : []
+    })
+
 
     const loadMappingLatentPhysical = (tileSize) => {
       defineMappingLatentPhysical(`${MODEL_URL}`,tileSize)
-        .then(mapping => setMappingLatentPhysical(mapping))
+        .then(mapping => {
+          const tmpDataManager = dataManager
+          tmpDataManager.mappingLatentPhysical = mapping
+          setDataManager(tmpDataManager)
+        })
         .catch(error => console.error('Erreur lors de la récupération du fichier :', error));
     };
 
@@ -62,7 +70,14 @@ const Display = () => {
       const fetchData = async () => {
         await getMetaData(DZI_URL);
       };
-    
+      loadData(MODEL_URL)
+      .then(layerData=>{
+        const tmpDataManager = dataManager
+        tmpDataManager.model_data = layerData
+        setDataManager(tmpDataManager)
+      }).catch(error => {
+        console.error(error);
+      });
       fetchData();
     }, [ROOT_URL,MODEL_URL,DZI_URL]); 
 
@@ -83,32 +98,7 @@ const Display = () => {
       loadMappingLatentPhysical(tileSize)
     }
 
-    useEffect(() => {
-      if (latentTouchedData.length > 0 || physicalTouchedData.length > 0) {
-        let tmpLatentTouchedData = latentTouchedData; // Utilisation de spread pour créer une nouvelle copie
-        let tmpPhysicalTouchedData = physicalTouchedData
-
-        for (const elem of physicalTouchedData) {
-          const { x, y } = elem;
-          let real_x = x/metaData.tileSize
-          let real_y = y/metaData.tileSize
-          if (real_x in mappingLatentPhysical.physicalToLatent && real_y in mappingLatentPhysical.physicalToLatent[real_x]) {
-              tmpLatentTouchedData.push(mappingLatentPhysical.physicalToLatent[real_x][real_y])
-          }
-        }   
-        for (const elem of latentTouchedData) {
-          const { umap_x, umap_y } = elem;
-          if (umap_x in mappingLatentPhysical.latentToPhysical && umap_y in mappingLatentPhysical.latentToPhysical[umap_x]) {
-              tmpPhysicalTouchedData.push(mappingLatentPhysical.latentToPhysical[umap_x][umap_y]);
-          }
-        }
-  
-        setLatentTouchedData(tmpLatentTouchedData)
-        setPhysicalTouchedData(tmpPhysicalTouchedData);
-      }
-    }); // Dépendances : latentTouchedData et physicalTouchedData
-    
-    if(physicalTouchedData !== undefined && latentTouchedData !== undefined){
+    if(dataManager.model_data !== undefined && dataManager.model_data.length !== 0){
       return (
         <div className="container">
             <h1>Example display</h1>
@@ -130,26 +120,23 @@ const Display = () => {
                 <PhysicalSpace 
                     activeTool={activeTool}
                     TOOLS = {TOOLS} 
-                    physicalTouchedData={physicalTouchedData} 
-                    setPhysicalTouchedData={setPhysicalTouchedData}
-                    layerType={LAYERTYPE.PHYSICAL}
                     metaData={metaData}
                     generalData={generalData}
-                    mappingLatentPhysical={mappingLatentPhysical}
+                    dataManager={dataManager}
+                    setDataManager={setDataManager}
                 />
                 </div>
                 <div className="layer">
                     <LatentSpace
                      activeTool={activeTool}
                      TOOLS = {TOOLS} 
-                     latentTouchedData={latentTouchedData} 
-                     setLatentTouchedData={setLatentTouchedData}
-                     layerType={LAYERTYPE.LATENT}
                      metaData={metaData}
-                     generalData={generalData}
+                     dataManager={dataManager}
+                     setDataManager={setDataManager}
                     />
                 </div>
-        </div>
+            </div>
+            <TableComponent dataManager={dataManager} setDataManager={setDataManager}/>
     </div>
     );
     }

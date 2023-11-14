@@ -50,3 +50,53 @@
         }
     }
 }
+
+// displays.scss
+.annotation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px; // Agrandir la marge intérieure
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    .editable {
+        position: relative;
+    
+        input {
+            padding: 8px; // Agrandir la marge intérieure
+            margin-right: 5px;
+        }
+    
+        .action-button {
+            margin-right: 15px; // Agrandir la marge intérieure
+            cursor: pointer;
+            font-size: 35px; // Augmenter la taille de la police
+            vertical-align: middle; // Ajouter cette ligne pour ajuster la vertical-align
+    
+            &.save-button {
+                color: #28a745; // vert
+            }
+    
+            &.cancel-button {
+                color: #dc3545; // rouge
+            }
+        }
+    }
+    .color-box {
+        width: 30px; // Agrandir la largeur
+        height: 30px; // Agrandir la hauteur
+    }
+
+    .visibility-checkbox {
+        margin: 0;
+        transform: scale(1.5); // Augmenter la taille de la checkbox
+    }
+}

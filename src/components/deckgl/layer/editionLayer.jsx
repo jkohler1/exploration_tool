@@ -1,33 +1,16 @@
 import React from 'react';
 import { DrawPolygonMode, DrawPointMode, DrawPolygonByDraggingMode } from '@nebula.gl/edit-modes';
 import { EditableGeoJsonLayer } from '@nebula.gl/layers';
-import LAYERTYPE from '../../../enums/LayerType';
-import {getAllTilesInsideAnnotation,getAllPointsInsideAnnotation} from '../../../utils';
+
 function EditableLayerComponent({
-  metaData,
-  activeTool,
-  TOOLS,
-  setActiveTool,
-  editedData,
-  setEditedData,
-  touchedData, 
-  setTouchedData,
-  layerType,
-  layerData,
-  mappingLatentPhysical
+  activeTool,TOOLS,editedData, setEditedData,metaData,dataManager,setNewFeature
 }) {
   const onEdit = ({ updatedData }) => {
     if (updatedData.features.length > editedData.features.length) {
-      if(layerType===LAYERTYPE.PHYSICAL){
-        let touchedTilesTmp = getAllTilesInsideAnnotation(metaData, updatedData,touchedData,mappingLatentPhysical);
-        setTouchedData(touchedTilesTmp);
-      }else if(layerType===LAYERTYPE.LATENT){
-        let touchedTilesTmp = getAllPointsInsideAnnotation(layerData, updatedData,touchedData);
-        setTouchedData(touchedTilesTmp);
-      } 
+      setNewFeature(updatedData.features[updatedData.features.length - 1])
       setEditedData(updatedData);
-      }
-};
+    }
+  };
 
   if (!metaData) return null;
 
@@ -38,6 +21,7 @@ function EditableLayerComponent({
     data: editedData,
     selectedFeatureIndexes: [],
     getFillColor: [0, 0, 0, 0], 
+    getLineColor: [0, 0, 0, 0], // Set line color to fully transparent
     mode: activeTool === TOOLS.LASSO ? new DrawPolygonMode() : activeTool === TOOLS.POINT ? new DrawPointMode() : new DrawPolygonByDraggingMode(),
     onEdit
   });

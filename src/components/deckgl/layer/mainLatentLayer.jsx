@@ -2,31 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { DeckGL } from 'deck.gl';
 import { CompositeLayer } from '@deck.gl/core';
 import { BitmapLayer, ScatterplotLayer } from '@deck.gl/layers';
-import { WebMercatorViewport } from '@deck.gl/core';
-import * as turf from '@turf/turf';
 
 class MainLatentLayer extends CompositeLayer {
+  componentDidUpdate(prevProps) {
+    console.log('MainLatentLayer Updated');
+    // Ajoutez d'autres déclarations de journalisation ou vérifications ici
+  }
   renderLayers() {
-    const { layerData, latentTouchedData } = this.props;
-    console.log(latentTouchedData)
+    const { dataManager } = this.props;
     const scatterplotLayer = new ScatterplotLayer({
-      data: layerData,
+      data: dataManager.model_data,
       radiusScale: 1000,
       radiusMinPixels: 0.5,
       getPosition: (d) => [d.umap_x, d.umap_y],
       getColor: [255, 0, 128],
     });
-
-    const latentPointsLayer = latentTouchedData && latentTouchedData.length > 0 ? 
-    new ScatterplotLayer({
-      data: latentTouchedData,
-      radiusScale: 1000,
-      radiusMinPixels: 0.5,
-      getPosition: (d) => [d.umap_x, d.umap_y], // Remplacez latent_x et latent_y par les propriétés correctes
-      getColor: [0, 128, 255], // Couleur différente pour les points latents
-    }) : null;
-
-    return [scatterplotLayer, latentPointsLayer];
+    const latentPointsLayers = dataManager.annotation.map(annotation => {
+      if (annotation.latentTouched && annotation.latentTouched.length > 0 && annotation.display === true) {
+        return new ScatterplotLayer({
+          id: `latentPointsLayer_${annotation.id}`, // Provide a unique id for each layer
+          data: annotation.latentTouched,
+          radiusScale: 2000,
+          radiusMinPixels: 4,
+          getPosition: (d) => [d.umap_x, d.umap_y],
+          getFillColor: annotation.color || [0, 128, 255], // Use the provided color or default to [0, 128, 255]
+        });
+      }
+      return null;
+    });
+    
+    // Filter out null layers
+    const validLatentPointsLayers = latentPointsLayers.filter(layer => layer !== null);
+    
+    return [scatterplotLayer, ...validLatentPointsLayers];        
   }
 }
 export default MainLatentLayer;
+
+
+ 
