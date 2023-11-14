@@ -13,7 +13,7 @@ import GeoJsonColorTileLayer from './layer/colorLayer';
 
 
 
-export default function PhysicalSpace({activeTool,TOOLS,metaData,generalData,dataManager,setDataManager}) {
+export default function PhysicalSpace({activeTool,TOOLS,metaData,generalData,dataManager,setDataManager,settingsManager}) {
   
   //view state
   const [viewState, setViewState] = useState({
@@ -37,12 +37,12 @@ export default function PhysicalSpace({activeTool,TOOLS,metaData,generalData,dat
     if (metaData && generalData) {
       const mainlayer = MainTileLayerComponent({ metaData, generalData});
       const editionLayer = EditableLayerComponent({activeTool,TOOLS,editedData, setEditedData,metaData,dataManager,setNewFeature});
-      const geoJsonColorTileLayer = GeoJsonColorTileLayer({metaData,dataManager})
+      const geoJsonColorTileLayer = GeoJsonColorTileLayer({metaData,dataManager,settingsManager})
       setMainLayer(mainlayer);
       setColorLayer(geoJsonColorTileLayer);
       setEditionLayer(editionLayer);
     }
-  }, [metaData, generalData, dataManager, TOOLS, activeTool]);
+  }, [metaData, generalData, dataManager, TOOLS, activeTool,settingsManager]);
 
   useEffect(()=>{
       if(newFeature!==null){

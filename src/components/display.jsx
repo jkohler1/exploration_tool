@@ -4,7 +4,9 @@ import LatentSpace from "./deckgl/LatentSpace";
 import './displays.scss'; 
 import TOOLS from '../enums/ToolsType'
 import {loadData} from '../utils';
-import TableComponent from './annotationTable'; // Assurez-vous d'ajuster le chemin
+import TableComponent from './annotationTable';
+import SettingsPanel from './settingsPanel';
+
 function defineMappingLatentPhysical(filename,tileSize) {
     return fetch(filename)
       .then(response => response.text())
@@ -53,6 +55,18 @@ const Display = () => {
       model_data : [],
       mappingLatentPhysical : [],
       annotation : []
+    })
+
+    const[settingsManager,setSettingsManager] = useState({
+      //tile parameter
+      minTileWidth : 1,   
+      lineTileWidth : 20, 
+      //scatter plot parameter
+      minPointSize : 0.5,
+      pointSize: 1000,
+      increaseAnnotationMinPointSize: 0,
+      increaseAnnotationPointSize: 0,
+      onlyAnnotation:false
     })
 
 
@@ -124,6 +138,7 @@ const Display = () => {
                     generalData={generalData}
                     dataManager={dataManager}
                     setDataManager={setDataManager}
+                    settingsManager={settingsManager}
                 />
                 </div>
                 <div className="layer">
@@ -133,9 +148,11 @@ const Display = () => {
                      metaData={metaData}
                      dataManager={dataManager}
                      setDataManager={setDataManager}
+                     settingsManager={settingsManager}
                     />
                 </div>
             </div>
+            <SettingsPanel settingsManager={settingsManager} setSettingsManager={setSettingsManager} />
             <TableComponent dataManager={dataManager} setDataManager={setDataManager}/>
     </div>
     );

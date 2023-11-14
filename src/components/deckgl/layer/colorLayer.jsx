@@ -1,7 +1,7 @@
 import React from 'react';
 import { GeoJsonLayer } from '@deck.gl/layers';
 
-function generateData(tileSize, annotations, layerType) {
+function generateData(tileSize, annotations,settingsManager) {
   if (!annotations || annotations.length === 0) {
     return [];
   }
@@ -38,8 +38,8 @@ function generateData(tileSize, annotations, layerType) {
       updateTriggers: {
         data: features
       },
-      lineWidthScale: 20,
-      lineWidthMinPixels: 1,
+      lineWidthScale: settingsManager.lineTileWidth,
+      lineWidthMinPixels: settingsManager.minTileWidth,
       getLineColor: annotation.color||[255, 0, 0, 255], // Rouge
       getFillColor: [0, 0, 0, 0] // transparent
     });
@@ -54,8 +54,8 @@ function generateData(tileSize, annotations, layerType) {
 }
 
 
-function GeoJsonColorTileLayer({ metaData, dataManager }) {
-  const layers = generateData(metaData.tileSize, dataManager.annotation);
+function GeoJsonColorTileLayer({ metaData, dataManager,settingsManager }) {
+  const layers = generateData(metaData.tileSize, dataManager.annotation,settingsManager);
 
   return layers;
 }
