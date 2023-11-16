@@ -40,15 +40,10 @@ function defineMappingLatentPhysical(filename,tileSize) {
   
 
 const Display = () => {
-    //URL
-    const ROOT_URL = process.env.PUBLIC_URL + '/output_data/transfer2';
-    const MODEL_URL = process.env.PUBLIC_URL + '/output_data/transfer2/model/umap_data.csv'
-    const DZI_URL = process.env.PUBLIC_URL + '/output_data/transfer2/tiling/test.svs/info.dzi'
-
-
+    
     const [activeTool, setActiveTool] = useState(TOOLS.LASSO);
     const [metaData, setMetaData] = useState(null);
-    const [generalData,setGeneralData] = useState({ROOT_URL,MODEL_URL,DZI_URL})
+    const [generalData,setGeneralData] = useState(null)
 
     const[dataManager,setDataManager] = useState({
       model_name : "No name",
@@ -69,32 +64,36 @@ const Display = () => {
       onlyAnnotation:false
     })
 
-
-    const loadMappingLatentPhysical = (tileSize) => {
-      defineMappingLatentPhysical(`${MODEL_URL}`,tileSize)
-        .then(mapping => {
-          const tmpDataManager = dataManager
-          tmpDataManager.mappingLatentPhysical = mapping
-          setDataManager(tmpDataManager)
+    //init data
+    useEffect(() => {
+      const ROOT_URL = process.env.PUBLIC_URL + '/output_data/transfer2';
+      const MODEL_URL = process.env.PUBLIC_URL + '/output_data/transfer2/model/umap_data.csv';
+      const DZI_URL = process.env.PUBLIC_URL + '/output_data/transfer2/tiling/test.svs/info.dzi';
+      setGeneralData({ ROOT_URL, MODEL_URL, DZI_URL });    
+      getMetaData(DZI_URL)
+        .then(tileSize => {
+          return defineMappingLatentPhysical(MODEL_URL, tileSize)
+            .then(mapping => {
+              return { metaData, mapping };
+            });
+        })
+        .then(({ metaData, mapping }) => {
+          loadData(MODEL_URL)
+            .then(layerData => {
+              const tmpDataManager = {
+                ...dataManager,
+                mappingLatentPhysical: mapping,
+                model_data: layerData,
+              };
+              setDataManager(tmpDataManager);
+            })
+            .catch(error => {
+              console.error(error);
+            });
         })
         .catch(error => console.error('Erreur lors de la récupération du fichier :', error));
-    };
-
-    useEffect(() => {
-      const fetchData = async () => {
-        await getMetaData(DZI_URL);
-      };
-      loadData(MODEL_URL)
-      .then(layerData=>{
-        const tmpDataManager = dataManager
-        tmpDataManager.model_data = layerData
-        setDataManager(tmpDataManager)
-      }).catch(error => {
-        console.error(error);
-      });
-      fetchData();
-    }, [ROOT_URL,MODEL_URL,DZI_URL]); 
-
+    }, []); 
+    
     const getMetaData = async (DZI_URL) => {
       const response = await fetch(DZI_URL);
       const xmlText = await response.text();
@@ -109,7 +108,7 @@ const Display = () => {
       const width = Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value);
       const tileSize = Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value);
       setMetaData({ height, width, tileSize });
-      loadMappingLatentPhysical(tileSize)
+      return tileSize
     }
 
     if(dataManager.model_data !== undefined && dataManager.model_data.length !== 0){
