@@ -1,16 +1,52 @@
 // SettingsPanel.js
 import React from 'react';
 
-const SettingsPanel = ({ settingsManager, setSettingsManager }) => {
+const SettingsPanel = ({ settingsManager, setSettingsManager,REDUC_DIM, MODEL, generalData, setGeneralData}) => {
   const handleSliderChange = (param, value) => {
     const newSettingsManager = { ...settingsManager, [param]: value };
     setSettingsManager(newSettingsManager);
   };
+  const onGeneralDataChange = (param, value) => {
+    const newGeneralData = { ...generalData, [param]: value };
+    setGeneralData(newGeneralData);
+  };
+  const modelOptions = MODEL.map((modelName) => (
+    <option key={modelName} value={modelName}>
+      {modelName}
+    </option>
+  ));
+
+  const reducOptions = REDUC_DIM.map((reducName) => (
+    <option key={reducName} value={reducName}>
+      {reducName}
+    </option>
+  ));
+
 
   return (
     <div className="settings-panel">
-
-
+      <div className="slider">
+      <label>Modèle:</label>
+      <select
+        value={settingsManager.current_model}
+        onChange={(e) => {
+          onGeneralDataChange("current_model",e.target.value);
+        }}
+      >
+        {modelOptions}
+      </select>
+      </div>
+      <div className="slider">
+      <label>Reduction method:</label>
+      <select
+        value={settingsManager.current_reduc}
+        onChange={(e) => {
+          onGeneralDataChange("current_reduc",e.target.value);
+        }}
+      >
+        {reducOptions}
+      </select>
+      </div>
       <div className="slider">
         <label>Line Tile Width</label>
         <input

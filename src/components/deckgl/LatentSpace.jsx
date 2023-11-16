@@ -11,7 +11,7 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
     longitude: 0,
     latitude: 0,
     zoom: 4,
-    maxZoom: 16
+    maxZoom: 20
   };
   const [viewState, setViewState] = useState(initialState);
 
@@ -38,10 +38,12 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
     }
   }, [metaData]);
 
+  useEffect(() => {
+    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager});
+    setMainLayer(mainLayerComponent);
+}, [dataManager,settingsManager]);
 
   useEffect(() => {
-      const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager});
-      setMainLayer(mainLayerComponent);
       const editionLayer = EditableLayerComponent({activeTool,TOOLS,editedData, setEditedData,metaData,dataManager,setNewFeature});    
       setEditionLayer(editionLayer);
   }, [metaData, dataManager,TOOLS, activeTool,settingsManager]);

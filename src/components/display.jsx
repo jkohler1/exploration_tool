@@ -7,8 +7,8 @@ import {loadData} from '../utils';
 import TableComponent from './annotationTable';
 import SettingsPanel from './settingsPanel';
 
-function defineMappingLatentPhysical(filename,tileSize) {
-    return fetch(filename)
+function defineMappingLatentPhysical(MODEL_URL,current_reduc,current_model,tileSize) {
+    return fetch(MODEL_URL+current_model+"/"+current_reduc+"_data.csv")
       .then(response => response.text())
       .then(data => {
         const physicalToLatent = {};
@@ -45,6 +45,9 @@ const Display = () => {
     const [metaData, setMetaData] = useState(null);
     const [generalData,setGeneralData] = useState(null)
 
+    // Use a state variable to track whether the first useEffect has run
+    const [initDataFetched, setInitDataFetched] = useState(false);
+
     const[dataManager,setDataManager] = useState({
       model_name : "No name",
       model_data : [],
@@ -64,21 +67,27 @@ const Display = () => {
       onlyAnnotation:false
     })
 
+    const REDUC_DIM = ["umap","tsne"]
+    const MODEL = ["vitb8","vits14"]
+
     //init data
     useEffect(() => {
       const ROOT_URL = process.env.PUBLIC_URL + '/output_data/transfer2';
-      const MODEL_URL = process.env.PUBLIC_URL + '/output_data/transfer2/model/umap_data.csv';
+      const MODEL_URL = process.env.PUBLIC_URL + '/output_data/transfer2/model/';
       const DZI_URL = process.env.PUBLIC_URL + '/output_data/transfer2/tiling/test.svs/info.dzi';
-      setGeneralData({ ROOT_URL, MODEL_URL, DZI_URL });    
+      const current_reduc = REDUC_DIM[0]
+      const current_model = MODEL[0]
+      setGeneralData({ ROOT_URL, MODEL_URL, DZI_URL,current_reduc,current_model });    
       getMetaData(DZI_URL)
         .then(tileSize => {
-          return defineMappingLatentPhysical(MODEL_URL, tileSize)
+          return defineMappingLatentPhysical(MODEL_URL,current_reduc,current_model, tileSize)
             .then(mapping => {
+              setInitDataFetched(true);
               return { metaData, mapping };
             });
         })
         .then(({ metaData, mapping }) => {
-          loadData(MODEL_URL)
+          loadData(MODEL_URL,current_reduc,current_model)
             .then(layerData => {
               const tmpDataManager = {
                 ...dataManager,
@@ -90,10 +99,53 @@ const Display = () => {
             .catch(error => {
               console.error(error);
             });
+            console.log(dataManager)
         })
         .catch(error => console.error('Erreur lors de la récupération du fichier :', error));
+        return () => setInitDataFetched(false);
     }, []); 
-    
+
+    // On General Data Change
+    useEffect(() => {
+      // Check if the initial data fetch has happened
+      if (!initDataFetched) {
+        return;
+      }
+      const fetchData = async () => {
+        try {
+          const mapping = await defineMappingLatentPhysical(generalData.MODEL_URL, generalData.current_reduc, generalData.current_model, metaData.tileSize);
+          const layerData = await loadData(generalData.MODEL_URL, generalData.current_reduc, generalData.current_model);
+          const newAnnotation = dataManager.annotation
+          for(const currentAnnotation of newAnnotation){
+            const newLatentAnnotation = []
+            for (const elem of currentAnnotation.physicalTouched) {
+              const { x, y } = elem;
+              let real_x = x/metaData.tileSize
+              let real_y = y/metaData.tileSize
+              if (real_x in mapping.physicalToLatent && real_y in mapping.physicalToLatent[real_x]) {
+                newLatentAnnotation.push(mapping.physicalToLatent[real_x][real_y])
+              }
+            }
+            currentAnnotation.latentTouched = newLatentAnnotation
+          }
+          
+
+          const tmpDataManager = {
+            ...dataManager,
+            mappingLatentPhysical: mapping,
+            model_data: layerData,
+            annotation : newAnnotation
+          };
+
+          setDataManager(tmpDataManager);
+        } catch (error) {
+          console.error('Erreur lors de la récupération du fichier :', error);
+        }
+      };
+
+      fetchData();
+    }, [generalData,initDataFetched]);
+
     const getMetaData = async (DZI_URL) => {
       const response = await fetch(DZI_URL);
       const xmlText = await response.text();
@@ -151,7 +203,7 @@ const Display = () => {
                     />
                 </div>
             </div>
-            <SettingsPanel settingsManager={settingsManager} setSettingsManager={setSettingsManager} />
+            <SettingsPanel settingsManager={settingsManager} setSettingsManager={setSettingsManager} REDUC_DIM={REDUC_DIM} MODEL={MODEL} generalData={generalData} setGeneralData={setGeneralData}/>
             <TableComponent dataManager={dataManager} setDataManager={setDataManager}/>
     </div>
     );

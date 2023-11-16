@@ -42,8 +42,8 @@ export function getAllTilesInsideAnnotation(metaData, newFeature,dataManager) {
     return touchedData;
   }
   
-  export function loadData(filePath) {
-    return fetch(filePath)
+  export function loadData(MODEL_URL,current_reduc,current_model) {
+    return fetch(MODEL_URL+current_model+"/"+current_reduc+"_data.csv")
       .then(response => response.text())
       .then(data => {
         const lines = data.split('\n');
