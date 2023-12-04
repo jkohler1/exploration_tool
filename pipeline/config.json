@@ -1,0 +1,42 @@
+{
+  "project_dir": "/mnt/iribhm/people/jkohler/dev",
+  "id": "2023-11-15T14:11:13.364178",
+  "slide": [
+    "/mnt/iribhm/people/jkohler/dev/data/input/test.svs"
+  ],
+  "output_dir": "/mnt/iribhm/people/jkohler/dev/output/output_folder_2023-11-15T14:11:13.364178",
+  "tile_size": 224,
+  "tile_resize": 224,
+  "seg": true,
+  "ndpi": false,
+  "processing_unit": "cuda:2",
+  "batch_size": 8,
+  "num_workers": 20,
+  "tiling_nw": 40,
+  "max_bg_frac": 0.5,
+  "model": null,
+  "suffix_folder": "svs",
+  "suffix_file": "csv",
+  "cell_size": 16,
+  "pc_sampled": 0.05,
+  "zoom": 0.5,
+  "set_seed": 520,
+  "len_name": 0,
+  "default_model": "resnet18",
+  "tiling": true,
+  "inference": true,
+  "inference_inputs": [],
+  "dimensionality_reduction": [
+    "umap",
+    "tsne"
+  ],
+  "model_type": [
+    "dino2",
+    "dino"
+  ],
+  "model_name": [
+    "vits14",
+    "vitb8"
+  ],
+  "npdi": false
+}
