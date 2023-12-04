@@ -48,18 +48,98 @@ export function getAllTilesInsideAnnotation(metaData, newFeature,dataManager) {
       .then(data => {
         const lines = data.split('\n');
         const layerData = lines.slice(1).map(line => {
-          const [filename, umap_x, umap_y] = line.split(',');
+          const [filename, umap_x, umap_y,avg_color] = line.split(',');
+          let jsArray = [0, 128, 255]
+          if(avg_color !== undefined){
+            let correctedStringArray = avg_color.replace(/\s+/g, ',');
+            jsArray = JSON.parse(`[${correctedStringArray}]`);
+          }
+          
           return {
             filename,
             umap_x: parseFloat(umap_x),
-            umap_y: parseFloat(umap_y)
+            umap_y: parseFloat(umap_y),
+            avg_color:jsArray
           };
         });
         return layerData;
       })
       .catch(error => {
         console.error(error);
-        return null; // Vous pouvez retourner une valeur par défaut ou gérer l'erreur ici
+        return null; 
+      });
+  }
+  
+  export function loadPredefinedData(MODEL_URL, dataManager) {
+    return fetch(`${MODEL_URL}/modelpoints_clusters.csv`)
+      .then((response) => response.text())
+      .then((data) => {
+        const lines = data.split('\n');
+        const layerData = lines.slice(1).map((line) => {
+          const [umap_x, umap_y, cluster, filename, avg_color] = line.split(',');
+          if (cluster !== '-1' && cluster !== undefined) {
+            let jsArray = [0, 128, 255];
+  
+            if (avg_color !== undefined) {
+              let correctedStringArray = avg_color.replace(/\s+/g, ',');
+              jsArray = JSON.parse(`[${correctedStringArray}]`);
+            }
+  
+            return {
+              filename,
+              umap_x: parseFloat(umap_x),
+              umap_y: parseFloat(umap_y),
+              cluster: cluster,
+              avg_color: jsArray,
+            };
+          }
+          return null;
+        });
+  
+        const annotationDico = {};
+        for (const elem of layerData) {
+          if (elem !== null) {
+            const { umap_x, umap_y, filename, cluster } = elem;
+            if (cluster!==undefined && !(cluster in annotationDico)) {
+              const latentElem = [];
+              const physicalElem = [];
+              if (
+                umap_x in dataManager.mappingLatentPhysical.latentToPhysical &&
+                umap_y in dataManager.mappingLatentPhysical.latentToPhysical[umap_x]
+              ) {
+                physicalElem.push(
+                  dataManager.mappingLatentPhysical.latentToPhysical[umap_x][umap_y]
+                );
+              }
+  
+              latentElem.push({ umap_x, umap_y, filename });
+  
+              annotationDico[cluster] = { latentElem, physicalElem };
+            } else {
+              const currentItem = annotationDico[cluster];
+              if (
+                umap_x in dataManager.mappingLatentPhysical.latentToPhysical &&
+                umap_y in dataManager.mappingLatentPhysical.latentToPhysical[umap_x]
+              ) {
+                currentItem.physicalElem.push(
+                  dataManager.mappingLatentPhysical.latentToPhysical[umap_x][umap_y]
+                );
+              }
+  
+              currentItem.latentElem.push({ umap_x, umap_y, filename });
+            }
+          }
+        }
+  
+        const annotationTab = Object.values(annotationDico).map((annotation) =>
+          generateEmptyAnnotation(annotation.latentElem, annotation.physicalElem)
+        );
+  
+        return annotationTab;
+      })
+      .catch((error) => {
+        console.error(error);
+        return null;
       });
   }
   
@@ -77,7 +157,7 @@ export function getAllTilesInsideAnnotation(metaData, newFeature,dataManager) {
   
   export function generateEmptyAnnotation(latentElem,physicalElem){
     let newAnnotation = {
-      id:Date.now(),
+      id:Date.now()+generateRandomColor(),
       name:"noName",
       display:true,
       color:generateRandomColor(),

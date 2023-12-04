@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChromePicker } from 'react-color';
 import './displays.scss';
 
-const AnnotationTable = ({ dataManager, setDataManager }) => {
+const AnnotationTable = ({ dataManager, setDataManager ,annotationTab,metaData}) => {
   const [colorId, setColorId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editedName, setEditedName] = useState('');
@@ -49,6 +49,12 @@ const AnnotationTable = ({ dataManager, setDataManager }) => {
     setDisplayColorPicker(!displayColorPicker);
   };
 
+  const handleKeyPress = (e, id) => {
+    if (e.key === 'Enter') {
+      saveChanges(id);
+    }
+  };
+
   const handleSaveColor = () => {
     const updatedAnnotations = dataManager.annotation.map(annotation => {
       if (annotation.id === colorId) {
@@ -62,8 +68,75 @@ const AnnotationTable = ({ dataManager, setDataManager }) => {
   
     setDisplayColorPicker(false);
   };
+
+  const handleBlankAnnotation = () => {
+    // Add logic for handling blank annotation
+    const newDataManager = { ...dataManager, annotation: [] };
+    setDataManager(newDataManager);
+  };
+
+  const handleDefaultAnnotation = () => {
+    setDataManager({
+      ...dataManager,
+      annotation:annotationTab
+    })
+};
+
+  const handleImportAnnotation = () => {
+    // Add logic for handling import annotation
+    console.log('Import Annotation clicked');
+  };
+
+  const handleExportAnnotation = () => {
+    // Create a GeoJSON object from annotations
+    const geojson = {
+      type: "FeatureCollection",
+      features: dataManager.annotation.flatMap(annotation => {
+        return annotation.physicalTouched.map(point => {
+          return {
+            type: "Feature",
+            geometry: {
+              type: "Polygon",
+              coordinates: [[
+                [point.x, point.y],
+                [point.x + metaData.tileSize, point.y],
+                [point.x + metaData.tileSize, point.y + metaData.tileSize],
+                [point.x, point.y + metaData.tileSize],
+                [point.x, point.y]
+              ]],
+            },
+            properties: {
+              name: annotation.name,
+              color: annotation.color,
+              display: annotation.display,
+              id: annotation.id,
+            },
+          };
+        });
+      }),
+    };
+
+    // Convert GeoJSON to a JSON string
+    const geojsonString = JSON.stringify(geojson, null, 2);
+
+    // Download the GeoJSON file
+    const blob = new Blob([geojsonString], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "annotations.geojson";
+    link.click();
+
+  };
+
   
   return (
+    <div>
+      <div className="annotation-buttons">
+        <button onClick={handleBlankAnnotation}>Blank Annotation</button>
+        <button onClick={handleDefaultAnnotation}>Default Annotation</button>
+        <button onClick={handleImportAnnotation}>Import Annotation</button>
+        <button onClick={handleExportAnnotation}>Export Annotation</button>
+      </div>
     <table className="annotation-table">
       <thead>
         <tr>
@@ -87,6 +160,7 @@ const AnnotationTable = ({ dataManager, setDataManager }) => {
                     type="text"
                     value={editedName}
                     onChange={(e) => setEditedName(e.target.value)}
+                    onKeyPress={(e) => handleKeyPress(e, annotation.id)} 
                   />
                   <span
                     className="action-button save-button"
@@ -138,6 +212,7 @@ const AnnotationTable = ({ dataManager, setDataManager }) => {
         ))}
       </tbody>
     </table>
+    </div>
   );
 };
 

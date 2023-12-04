@@ -48,14 +48,14 @@ const SettingsPanel = ({ settingsManager, setSettingsManager,REDUC_DIM, MODEL, g
       </select>
       </div>
       <div className="slider">
-        <label>Line Tile Width</label>
+        <label>Tiles Opacities</label>
         <input
           type="range"
           min="1"
-          max="200"
+          max="255"
           step="10"
-          value={settingsManager.lineTileWidth}
-          onChange={(e) => handleSliderChange('lineTileWidth', parseInt(e.target.value))}
+          value={settingsManager.opacity}
+          onChange={(e) => handleSliderChange('opacity', parseInt(e.target.value))}
         />
       </div>
 
@@ -81,6 +81,18 @@ const SettingsPanel = ({ settingsManager, setSettingsManager,REDUC_DIM, MODEL, g
           step="1"
           value={settingsManager.increaseAnnotationPointSize}
           onChange={(e) => handleSliderChange('increaseAnnotationPointSize', parseInt(e.target.value))}
+        />
+      </div>
+
+      <div className="slider">
+        <label>Increase Tiles Size (Zoom)</label>
+        <input
+          type="range"
+          min="1"
+          max="10"
+          step="1"
+          value={settingsManager.tileZoomSize/0.032}
+          onChange={(e) => handleSliderChange('tileZoomSize', parseInt(e.target.value)*0.032)}
         />
       </div>
 

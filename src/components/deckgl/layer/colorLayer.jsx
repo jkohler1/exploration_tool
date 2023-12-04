@@ -38,10 +38,13 @@ function generateData(tileSize, annotations,settingsManager) {
       updateTriggers: {
         data: features
       },
-      lineWidthScale: settingsManager.lineTileWidth,
       lineWidthMinPixels: settingsManager.minTileWidth,
-      getLineColor: annotation.color||[255, 0, 0, 255], // Rouge
-      getFillColor: [0, 0, 0, 0] // transparent
+      getLineColor: annotation.color
+        ? [...annotation.color.slice(0, 3), settingsManager.opacity]
+        : [255, 0, 0, settingsManager.opacity],
+      getFillColor: annotation.color
+        ? [...annotation.color.slice(0, 3), settingsManager.opacity]
+        : [255, 0, 0, settingsManager.opacity]
     });
 
     layers.push(geojsonLayer);

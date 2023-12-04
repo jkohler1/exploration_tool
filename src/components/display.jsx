@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import PhysicalSpace from "./deckgl/PhysicalSpace";
 import LatentSpace from "./deckgl/LatentSpace";
 import './displays.scss'; 
+import '../style.css'
 import TOOLS from '../enums/ToolsType'
-import {loadData} from '../utils';
+import {loadData,loadPredefinedData} from '../utils';
 import TableComponent from './annotationTable';
 import SettingsPanel from './settingsPanel';
 
@@ -44,7 +45,9 @@ const Display = () => {
     const [activeTool, setActiveTool] = useState(TOOLS.LASSO);
     const [metaData, setMetaData] = useState(null);
     const [generalData,setGeneralData] = useState(null)
-
+    const [loadTiles, setLoadTiles] = useState(false);
+    const [latentViewState, setLatentViewState] = useState(null);
+    const [annotationTab,setAnnotationTab] = useState(null)
     // Use a state variable to track whether the first useEffect has run
     const [initDataFetched, setInitDataFetched] = useState(false);
 
@@ -58,26 +61,33 @@ const Display = () => {
     const[settingsManager,setSettingsManager] = useState({
       //tile parameter
       minTileWidth : 1,   
-      lineTileWidth : 20, 
+      opacity : 100, 
       //scatter plot parameter
       minPointSize : 0.5,
-      pointSize: 1000,
+      pointSize: 5000,
       increaseAnnotationMinPointSize: 0,
       increaseAnnotationPointSize: 0,
-      onlyAnnotation:false
+      onlyAnnotation:false,
+      tileZoomSize:0.032
     })
 
     const REDUC_DIM = ["umap","tsne"]
     const MODEL = ["vitb8","vits14"]
 
-    //init data
+
     useEffect(() => {
-      const ROOT_URL = process.env.PUBLIC_URL + '/output_data/transfer2';
-      const MODEL_URL = process.env.PUBLIC_URL + '/output_data/transfer2/model/';
-      const DZI_URL = process.env.PUBLIC_URL + '/output_data/transfer2/tiling/test.svs/info.dzi';
+      const ROOT_URL = process.env.PUBLIC_URL + '/output_data/data';
+      const DZI_URL = process.env.PUBLIC_URL + '/output_data/data/tiling/test.svs/info.dzi';
+      const MODEL_URL = process.env.PUBLIC_URL + '/output_data/data/model/';
       const current_reduc = REDUC_DIM[0]
       const current_model = MODEL[0]
       setGeneralData({ ROOT_URL, MODEL_URL, DZI_URL,current_reduc,current_model });    
+      setLatentViewState({
+        longitude: 0,
+        latitude: 0,
+        zoom: 4,
+        maxZoom: 20
+      })
       getMetaData(DZI_URL)
         .then(tileSize => {
           return defineMappingLatentPhysical(MODEL_URL,current_reduc,current_model, tileSize)
@@ -87,7 +97,7 @@ const Display = () => {
             });
         })
         .then(({ metaData, mapping }) => {
-          loadData(MODEL_URL,current_reduc,current_model)
+          loadData(MODEL_URL, current_reduc, current_model)
             .then(layerData => {
               const tmpDataManager = {
                 ...dataManager,
@@ -95,11 +105,21 @@ const Display = () => {
                 model_data: layerData,
               };
               setDataManager(tmpDataManager);
+              return tmpDataManager; // Return the updated dataManager
+            })
+            .then(updatedDataManager => {
+              console.log(updatedDataManager); // Log the updated dataManager
+              loadPredefinedData(MODEL_URL, updatedDataManager)
+                .then(annotationTab => {
+                  setAnnotationTab(annotationTab)
+                })
+                .catch(error => {
+                  console.error(error);
+                });
             })
             .catch(error => {
               console.error(error);
             });
-            console.log(dataManager)
         })
         .catch(error => console.error('Erreur lors de la récupération du fichier :', error));
         return () => setInitDataFetched(false);
@@ -163,11 +183,10 @@ const Display = () => {
       return tileSize
     }
 
-    if(dataManager.model_data !== undefined && dataManager.model_data.length !== 0){
+    if(dataManager.model_data !== undefined && dataManager.model_data.length !== 0 && latentViewState!== undefined){
       return (
         <div className="container">
-            <h1>Example display</h1>
-            
+            <h1>Slide name</h1>            
             <div className="toolbar">
                 {Object.values(TOOLS).map(tool => (
                     <button 
@@ -175,9 +194,28 @@ const Display = () => {
                         onClick={() => setActiveTool(tool)}
                         className={activeTool === tool ? "active" : ""}
                     >
-                        {tool} {/* to replace with icon*/} 
+                        {tool}
                     </button>
                 ))}
+                 {latentViewState.zoom >= 7 && (
+                  <button
+                    onClick={() => 
+                      setLoadTiles(!loadTiles)
+                      
+                    }
+                    className={loadTiles ? 'active' : 'inactive'}
+                    style={{
+                      marginLeft: 'auto',
+                      padding: '8px 16px',  // Ajustez la taille du bouton en modifiant ces valeurs
+                      backgroundColor: loadTiles ? '#4CAF50' : '#555',  // Couleur de fond
+                      color: 'white',  // Couleur du texte
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                    }}                  >
+                    {loadTiles ? 'Stop Load Tiles' : 'Load Tiles'}
+                  </button>
+                )}
             </div>
             
             <div className="layers-wrapper">
@@ -200,11 +238,24 @@ const Display = () => {
                      dataManager={dataManager}
                      setDataManager={setDataManager}
                      settingsManager={settingsManager}
+                     latentViewState={latentViewState}
+                     setLatentViewState={setLatentViewState}
+                     loadTiles={loadTiles}
+                     setLoadTiles={setLoadTiles}
                     />
                 </div>
             </div>
-            <SettingsPanel settingsManager={settingsManager} setSettingsManager={setSettingsManager} REDUC_DIM={REDUC_DIM} MODEL={MODEL} generalData={generalData} setGeneralData={setGeneralData}/>
-            <TableComponent dataManager={dataManager} setDataManager={setDataManager}/>
+            <div className="parameter">
+            <SettingsPanel
+              settingsManager={settingsManager}
+              setSettingsManager={setSettingsManager}
+              REDUC_DIM={REDUC_DIM}
+              MODEL={MODEL}
+              generalData={generalData}
+              setGeneralData={setGeneralData}
+            />
+            </div>
+            <TableComponent dataManager={dataManager} setDataManager={setDataManager} generalData={generalData} annotationTab={annotationTab} metaData={metaData}/>
     </div>
     );
     }

@@ -34,7 +34,7 @@
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
-
+    
     button {
         padding: 0.5rem 1rem;
         border: none;
@@ -49,6 +49,34 @@
             background-color: #d0d0d0;
         }
     }
+}
+
+.annotation-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    margin-top: 15px;
+  
+    button {
+      padding: 10px 15px;
+      background-color: #a1780a; /* Muted Blue-Gray Color */
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+  
+      &:hover {
+        background-color: #495057; /* Darker Shade on Hover */
+      }
+    }
+  }
+
+.parameter {
+    border: 1px solid #AAA;  /* Bordure de 1 pixel solide en couleur grise */
+    padding: 16px;           /* Espace intérieur de 16 pixels */
+    margin-top: 16px;        /* Marge supérieure de 16 pixels pour l'éloigner des autres éléments */
+    border-radius: 8px;      /* Coins arrondis */
 }
 
 // displays.scss
@@ -100,3 +128,4 @@
         transform: scale(1.5); // Augmenter la taille de la checkbox
     }
 }
+

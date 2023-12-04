@@ -4,24 +4,15 @@ import MainLatentLayer from './layer/mainLatentLayer';
 import EditableLayerComponent from './layer/editionLayer';
 import {getAllPointsInsideAnnotation,generateEmptyAnnotation} from '../../utils';
 
-export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDataManager,settingsManager}) {
+export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDataManager,settingsManager,latentViewState,setLatentViewState,loadTiles,setLoadTiles}) {
   
-  //view data
-  const initialState = {
-    longitude: 0,
-    latitude: 0,
-    zoom: 4,
-    maxZoom: 20
-  };
-  const [viewState, setViewState] = useState(initialState);
-
-
 
   //Required data for Edition Layer
   const [editedData, setEditedData] = useState({
     type: 'FeatureCollection',
     features: []
   });
+
   const [newFeature,setNewFeature] = useState(null)
 
   //Layer
@@ -31,7 +22,7 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
   useEffect(() => {  
     if(metaData){
       // Adjust the viewState to center based on the image dimensions
-      setViewState({
+      setLatentViewState({
         target: [metaData.width / 2, metaData.height / 2, 0],
         zoom: -5
       });
@@ -39,9 +30,15 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
   }, [metaData]);
 
   useEffect(() => {
-    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager});
+    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles});
     setMainLayer(mainLayerComponent);
-}, [dataManager,settingsManager]);
+}, [dataManager,settingsManager,latentViewState]);
+
+useEffect(() => {
+    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles});
+    setMainLayer(mainLayerComponent);
+
+}, [loadTiles]);
 
   useEffect(() => {
       const editionLayer = EditableLayerComponent({activeTool,TOOLS,editedData, setEditedData,metaData,dataManager,setNewFeature});    
@@ -72,11 +69,13 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
   return (
 
     <DeckGL
-      initialViewState={viewState}
-      viewState={viewState}
+      initialViewState={latentViewState}
+      viewState={latentViewState}
       controller={true}
       layers={[mainLayer,editionLayer]}
-      onViewStateChange={({ viewState }) => setViewState(viewState)}
+      onViewStateChange={({ viewState }) => {
+        setLatentViewState(viewState)
+      }}
     />
   );
 }
