@@ -47,7 +47,6 @@ const Display = () => {
     const [generalData,setGeneralData] = useState(null)
     const [loadTiles, setLoadTiles] = useState(false);
     const [latentViewState, setLatentViewState] = useState(null);
-    const [annotationTab,setAnnotationTab] = useState(null)
     // Use a state variable to track whether the first useEffect has run
     const [initDataFetched, setInitDataFetched] = useState(false);
 
@@ -72,16 +71,17 @@ const Display = () => {
     })
 
     const REDUC_DIM = ["umap","tsne"]
-    const MODEL = ["vitb8","vits14"]
+    const MODEL = ["vitb8","vits14","lunit_dino_model"]
 
 
     useEffect(() => {
       const ROOT_URL = process.env.PUBLIC_URL + '/output_data/data';
       const DZI_URL = process.env.PUBLIC_URL + '/output_data/data/tiling/test.svs/info.dzi';
       const MODEL_URL = process.env.PUBLIC_URL + '/output_data/data/model/';
+      const SLIDE_NAME = 'thyroid_1'
       const current_reduc = REDUC_DIM[0]
       const current_model = MODEL[0]
-      setGeneralData({ ROOT_URL, MODEL_URL, DZI_URL,current_reduc,current_model });    
+      setGeneralData({ ROOT_URL, MODEL_URL, DZI_URL,current_reduc,current_model,SLIDE_NAME });    
       setLatentViewState({
         longitude: 0,
         latitude: 0,
@@ -108,14 +108,7 @@ const Display = () => {
               return tmpDataManager; // Return the updated dataManager
             })
             .then(updatedDataManager => {
-              console.log(updatedDataManager); // Log the updated dataManager
-              loadPredefinedData(MODEL_URL, updatedDataManager)
-                .then(annotationTab => {
-                  setAnnotationTab(annotationTab)
-                })
-                .catch(error => {
-                  console.error(error);
-                });
+                //aaaa
             })
             .catch(error => {
               console.error(error);
@@ -186,8 +179,8 @@ const Display = () => {
     if(dataManager.model_data !== undefined && dataManager.model_data.length !== 0 && latentViewState!== undefined){
       return (
         <div className="container">
-            <h1>Slide name</h1>            
-            <div className="toolbar">
+            <h1>{generalData.SLIDE_NAME !== undefined ? generalData.SLIDE_NAME : "noName"}</h1>            
+            <div className="annotation-buttons toolbar">
                 {Object.values(TOOLS).map(tool => (
                     <button 
                         key={tool}
@@ -207,10 +200,7 @@ const Display = () => {
                     style={{
                       marginLeft: 'auto',
                       padding: '8px 16px',  // Ajustez la taille du bouton en modifiant ces valeurs
-                      backgroundColor: loadTiles ? '#4CAF50' : '#555',  // Couleur de fond
-                      color: 'white',  // Couleur du texte
                       border: 'none',
-                      borderRadius: '4px',
                       cursor: 'pointer',
                     }}                  >
                     {loadTiles ? 'Stop Load Tiles' : 'Load Tiles'}
@@ -255,7 +245,7 @@ const Display = () => {
               setGeneralData={setGeneralData}
             />
             </div>
-            <TableComponent dataManager={dataManager} setDataManager={setDataManager} generalData={generalData} annotationTab={annotationTab} metaData={metaData}/>
+            <TableComponent dataManager={dataManager} setDataManager={setDataManager} generalData={generalData} metaData={metaData}/>
     </div>
     );
     }

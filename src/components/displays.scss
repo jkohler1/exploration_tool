@@ -36,17 +36,8 @@
     margin-bottom: 1rem;
     
     button {
-        padding: 0.5rem 1rem;
-        border: none;
-        background-color: #f5f5f5;
-        cursor: pointer;
-
-        &:hover {
-            background-color: #e0e0e0;
-        }
-
         &.active {
-            background-color: #d0d0d0;
+            background-color: #004647;
         }
     }
 }
@@ -69,6 +60,7 @@
       &:hover {
         background-color: #495057; /* Darker Shade on Hover */
       }
+      
     }
   }
 

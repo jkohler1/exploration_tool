@@ -70,8 +70,8 @@ export function getAllTilesInsideAnnotation(metaData, newFeature,dataManager) {
       });
   }
   
-  export function loadPredefinedData(MODEL_URL, dataManager) {
-    return fetch(`${MODEL_URL}/modelpoints_clusters.csv`)
+  export function loadPredefinedData(MODEL_URL,current_model, dataManager) {
+    return fetch(`${MODEL_URL}${current_model}/default_clusters.csv`)
       .then((response) => response.text())
       .then((data) => {
         const lines = data.split('\n');

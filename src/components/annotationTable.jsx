@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { ChromePicker } from 'react-color';
+import {loadPredefinedData} from '../utils';
 import './displays.scss';
 
-const AnnotationTable = ({ dataManager, setDataManager ,annotationTab,metaData}) => {
+const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) => {
   const [colorId, setColorId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editedName, setEditedName] = useState('');
@@ -76,10 +77,17 @@ const AnnotationTable = ({ dataManager, setDataManager ,annotationTab,metaData})
   };
 
   const handleDefaultAnnotation = () => {
-    setDataManager({
-      ...dataManager,
-      annotation:annotationTab
+    loadPredefinedData(generalData.MODEL_URL,generalData.current_model, dataManager)
+    .then(annotationTab => {
+      setDataManager({
+        ...dataManager,
+        annotation:annotationTab
+      })
     })
+    .catch(error => {
+      console.error(error);
+    });
+   
 };
 
   const handleImportAnnotation = () => {

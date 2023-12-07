@@ -48,7 +48,7 @@ class MainLatentLayer extends CompositeLayer {
   
         // Couleur par défaut si l'annotation n'est pas trouvée
         let color = [255, 0, 0];
-  
+          
         layers.push(new BitmapLayer({
           id: dataPoint.filename,
           data: [dataPoint], // Vous devez passer une liste de données à BitmapLayer
@@ -106,7 +106,6 @@ class MainLatentLayer extends CompositeLayer {
       });
     }
   }
-
 
 
 
