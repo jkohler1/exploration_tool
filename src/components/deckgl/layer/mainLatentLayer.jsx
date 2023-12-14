@@ -36,7 +36,7 @@ class MainLatentLayer extends CompositeLayer {
   loadDataZoom(data,dataManager,settingsManager,layers){
     if (data.length > 0) {
       data.forEach(dataPoint => {
-        const img = `/output_data/data/tiling/test.svs/level_16/data/${dataPoint.filename}`;
+        const img = `output_data/tiling/test.svs/level_16/data/${dataPoint.filename}`;
         const TAILLE_COTE_CARRÉ = settingsManager.tileZoomSize;
         
         // Recherche de l'annotation correspondante
@@ -69,7 +69,6 @@ class MainLatentLayer extends CompositeLayer {
         }));
 
         if (annotation) {
-          console.log(color)
           const geojsonLayer = new GeoJsonLayer({
             id: `geojson-annotation-layer-${annotation.id}-${dataPoint.umap_x}-${dataPoint.umap_y}`,
             pickable: true,
@@ -99,7 +98,6 @@ class MainLatentLayer extends CompositeLayer {
             getLineColor: [...annotation.color, settingsManager.opacity],
             getFillColor: [...annotation.color, settingsManager.opacity]
           });
-          console.log(geojsonLayer);
           layers.push(geojsonLayer);
         }
         
@@ -113,6 +111,7 @@ class MainLatentLayer extends CompositeLayer {
     const { dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles } = this.props;
     const layers = [];
     if(latentViewState.zoom >= 7 && loadTiles){
+      console.log(dataManager)
       const data = this.getVisiblePoints(latentViewState, dataManager.model_data);
       this.loadDataZoom(data,dataManager,settingsManager,layers)
       return layers;

@@ -35,7 +35,7 @@ function MainTileLayerComponent({ metaData, generalData}) {
           clamp(bottom, 0, metaData.height),
           clamp(right, 0, metaData.width),
           clamp(top, 0, metaData.height)
-        ],
+        ]
       };
 
       const bitmapLayer = new BitmapLayer(props, baseLayerProps);

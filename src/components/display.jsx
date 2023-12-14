@@ -38,6 +38,7 @@ function defineMappingLatentPhysical(MODEL_URL,current_reduc,current_model,tileS
       })
       .catch(error => console.error('Erreur lors de la récupération du fichier :', error));
   }
+
   
 
 const Display = () => {
@@ -49,6 +50,8 @@ const Display = () => {
     const [latentViewState, setLatentViewState] = useState(null);
     // Use a state variable to track whether the first useEffect has run
     const [initDataFetched, setInitDataFetched] = useState(false);
+    const [heightPhysical, setPhysicalHeight] = useState(500); // Hauteur initiale
+
 
     const[dataManager,setDataManager] = useState({
       model_name : "No name",
@@ -75,9 +78,9 @@ const Display = () => {
 
 
     useEffect(() => {
-      const ROOT_URL = process.env.PUBLIC_URL + '/output_data/data';
-      const DZI_URL = process.env.PUBLIC_URL + '/output_data/data/tiling/test.svs/info.dzi';
-      const MODEL_URL = process.env.PUBLIC_URL + '/output_data/data/model/';
+      const ROOT_URL = process.env.PUBLIC_URL + 'output_data';
+      const DZI_URL = process.env.PUBLIC_URL + 'output_data/tiling/test.svs/info.dzi';
+      const MODEL_URL = process.env.PUBLIC_URL + 'output_data/model/';
       const SLIDE_NAME = 'thyroid_1'
       const current_reduc = REDUC_DIM[0]
       const current_model = MODEL[0]
@@ -88,7 +91,7 @@ const Display = () => {
         zoom: 4,
         maxZoom: 20
       })
-      getMetaData(DZI_URL)
+        getMetaData(DZI_URL)
         .then(tileSize => {
           return defineMappingLatentPhysical(MODEL_URL,current_reduc,current_model, tileSize)
             .then(mapping => {
@@ -107,12 +110,6 @@ const Display = () => {
               setDataManager(tmpDataManager);
               return tmpDataManager; // Return the updated dataManager
             })
-            .then(updatedDataManager => {
-                //aaaa
-            })
-            .catch(error => {
-              console.error(error);
-            });
         })
         .catch(error => console.error('Erreur lors de la récupération du fichier :', error));
         return () => setInitDataFetched(false);
@@ -176,6 +173,15 @@ const Display = () => {
       return tileSize
     }
 
+    const removeLastAnnotation = () => {
+      const idLast = (dataManager.annotation)[dataManager.annotation.length-1].id
+      const updatedAnnotations = dataManager.annotation.filter(annotation => annotation.id !== idLast);
+  
+      const newDataManager = { ...dataManager, annotation: updatedAnnotations };
+      setDataManager(newDataManager);
+    };
+
+
     if(dataManager.model_data !== undefined && dataManager.model_data.length !== 0 && latentViewState!== undefined){
       return (
         <div className="container">
@@ -190,11 +196,24 @@ const Display = () => {
                         {tool}
                     </button>
                 ))}
+                {dataManager.annotation.length > 0  && (
+                  <button
+                    onClick={() => 
+                      removeLastAnnotation()
+                    }
+                    style={{
+                      marginLeft: 'auto',
+                      padding: '8px 16px',  // Ajustez la taille du bouton en modifiant ces valeurs
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}                  >
+                    {'Remove last annotation'}
+                  </button>
+                )}
                  {latentViewState.zoom >= 7 && (
                   <button
                     onClick={() => 
-                      setLoadTiles(!loadTiles)
-                      
+                      setLoadTiles(!loadTiles)                      
                     }
                     className={loadTiles ? 'active' : 'inactive'}
                     style={{
@@ -209,7 +228,7 @@ const Display = () => {
             </div>
             
             <div className="layers-wrapper">
-                <div className="layer">
+                <div className="layer" style={{ height: `${heightPhysical}px`}}>
                 <PhysicalSpace 
                     activeTool={activeTool}
                     TOOLS = {TOOLS} 

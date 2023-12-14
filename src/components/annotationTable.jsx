@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChromePicker } from 'react-color';
-import {loadPredefinedData} from '../utils';
+import {loadPredefinedData,generateEmptyAnnotation} from '../utils';
 import './displays.scss';
 
 const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) => {
@@ -29,7 +29,7 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
   const saveChanges = (id) => {
     const updatedAnnotations = dataManager.annotation.map(annotation => {
       if (annotation.id === id) {
-        return { ...annotation, name: editedName, color: [selectedColor.r, selectedColor.g, selectedColor.b] };
+        return { ...annotation, name: editedName};
       }
       return annotation;
     });
@@ -90,9 +90,77 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
    
 };
 
-  const handleImportAnnotation = () => {
-    // Add logic for handling import annotation
-    console.log('Import Annotation clicked');
+  const handleImportAnnotation = (e) => {
+    e.preventDefault();
+
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = ".geojson"; 
+  fileInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const content = e.target.result;
+        const importedGeoJSON = JSON.parse(content);
+        const annotationDico = {};
+        try {
+          // Parsez le contenu du fichier en tant qu'objet GeoJSON
+          const importedGeoJSON = JSON.parse(content);
+
+          // Assurez-vous que la structure du GeoJSON est conforme à vos attentes
+          if (importedGeoJSON && importedGeoJSON.features) {
+            // Traversez les caractéristiques du GeoJSON
+            importedGeoJSON.features.forEach(feature => {
+              // Extrait les propriétés et la géométrie
+              const { properties, geometry } = feature;
+
+              // Vous pouvez maintenant utiliser properties et geometry comme vous le souhaitez
+              const name = properties.name;
+              const color = properties.color;
+              const display = properties.display;
+              const cluster = properties.id;
+              const x = (geometry.coordinates)[0][0][0]
+              const y = (geometry.coordinates)[0][0][1]
+              let real_x = x/metaData.tileSize
+              let real_y = y/metaData.tileSize
+              if (real_x in dataManager.mappingLatentPhysical.physicalToLatent && real_y in dataManager.mappingLatentPhysical.physicalToLatent[real_x]) {
+                const latent = dataManager.mappingLatentPhysical.physicalToLatent[real_x][real_y]
+                if (!(cluster in annotationDico)) {    
+                  const latentElem = [];
+                  const physicalElem = [];
+                  latentElem.push(latent)
+                  physicalElem.push({x,y})
+                  let newAnnotation = generateEmptyAnnotation(latentElem,physicalElem)
+                  newAnnotation.name = name
+                  newAnnotation.display = display
+                  newAnnotation.color = color
+                  annotationDico[cluster] = newAnnotation;
+                } else {
+                  const currentItem = annotationDico[cluster];
+                  currentItem.latentTouched.push(latent);
+                  currentItem.physicalTouched.push({x,y})
+                }
+              }
+
+            });
+          } else {
+            console.error('Invalid GeoJSON format');
+          }
+        } catch (error) {
+          console.error('Error parsing GeoJSON:', error);
+        }
+        const annotationList = Object.values(annotationDico);
+        setDataManager({
+          ...dataManager,
+          annotation: annotationList
+        })
+      };
+      reader.readAsText(file);
+      }
+    });
+    fileInput.click();
   };
 
   const handleExportAnnotation = () => {
@@ -123,18 +191,20 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
         });
       }),
     };
-
+  
     // Convert GeoJSON to a JSON string
     const geojsonString = JSON.stringify(geojson, null, 2);
-
-    // Download the GeoJSON file
-    const blob = new Blob([geojsonString], { type: "application/json" });
+  
+    // Create a Blob and initiate a download using a data URL
+    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(geojsonString)}`;
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
+    link.href = dataUri;
     link.download = "annotations.geojson";
+    document.body.appendChild(link);
     link.click();
-
+    document.body.removeChild(link);
   };
+  
 
   
   return (
@@ -142,7 +212,7 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
       <div className="annotation-buttons">
         <button onClick={handleBlankAnnotation}>Blank Annotation</button>
         <button onClick={handleDefaultAnnotation}>Default Annotation</button>
-        <button onClick={handleImportAnnotation}>Import Annotation</button>
+        <button onClick={(e) => handleImportAnnotation(e)}>Import Annotation</button>
         <button onClick={handleExportAnnotation}>Export Annotation</button>
       </div>
     <table className="annotation-table">
@@ -196,7 +266,7 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
                 }}
                 onClick={() => handleClickColor(annotation.id)}
                 />
-              {displayColorPicker && (
+              {displayColorPicker && annotation.id === colorId && (
                 <div style={{ position: 'absolute', zIndex: '2' }}>
                   <ChromePicker color={selectedColor} onChange={handleChangeColor} />
                   <button onClick={handleSaveColor}>Save</button>

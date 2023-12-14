@@ -57,13 +57,13 @@ export default function PhysicalSpace({activeTool,TOOLS,metaData,generalData,dat
           }
         }
         let newAnnotation = generateEmptyAnnotation(latentElem,physicalElem)
-        console.log(newAnnotation)
         const currentAnnotation = dataManager.annotation
         currentAnnotation.push(newAnnotation)
         setDataManager({
           ...dataManager,
           annotation:currentAnnotation
         })
+
       }
   },[newFeature])
 
