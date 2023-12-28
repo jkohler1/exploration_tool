@@ -33,10 +33,11 @@ class MainLatentLayer extends CompositeLayer {
     return dataInsidePolygon;
   }
 
-  loadDataZoom(data,dataManager,settingsManager,layers){
+  loadDataZoom(data,dataManager,settingsManager,layers,generalData){
     if (data.length > 0) {
       data.forEach(dataPoint => {
-        const img = `output_data/tiling/test.svs/level_16/data/${dataPoint.filename}`;
+        const img = `output_data/tiling/${generalData.SLIDE_NAME}.svs/level_16/data/${dataPoint.filename}`;
+        console.log(img)
         const TAILLE_COTE_CARRÉ = settingsManager.tileZoomSize;
         
         // Recherche de l'annotation correspondante
@@ -108,17 +109,17 @@ class MainLatentLayer extends CompositeLayer {
 
 
   renderLayers() {
-    const { dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles } = this.props;
+    const { dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData } = this.props;
     const layers = [];
     if(latentViewState.zoom >= 7 && loadTiles){
       console.log(dataManager)
       const data = this.getVisiblePoints(latentViewState, dataManager.model_data);
-      this.loadDataZoom(data,dataManager,settingsManager,layers)
+      this.loadDataZoom(data,dataManager,settingsManager,layers,generalData)
       return layers;
     }
     if (latentViewState.zoom >= 9 && !loadTiles) {
       const data = this.getVisiblePoints(latentViewState, dataManager.model_data);
-      this.loadDataZoom(data,dataManager,settingsManager,layers)
+      this.loadDataZoom(data,dataManager,settingsManager,layers,generalData)
       return layers;
     }
     else{

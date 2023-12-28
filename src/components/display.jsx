@@ -73,32 +73,32 @@ const Display = () => {
       tileZoomSize:0.032
     })
 
-    const REDUC_DIM = ["umap","tsne"]
-    const MODEL = ["vitb8","vits14","lunit_dino_model"]
+
 
 
     useEffect(() => {
+      const CONFIG_URL = process.env.PUBLIC_URL+'output_data/config.json' 
       const ROOT_URL = process.env.PUBLIC_URL + 'output_data';
-      const DZI_URL = process.env.PUBLIC_URL + 'output_data/tiling/test.svs/info.dzi';
       const MODEL_URL = process.env.PUBLIC_URL + 'output_data/model/';
-      const SLIDE_NAME = 'thyroid_1'
-      const current_reduc = REDUC_DIM[0]
-      const current_model = MODEL[0]
-      setGeneralData({ ROOT_URL, MODEL_URL, DZI_URL,current_reduc,current_model,SLIDE_NAME });    
+      let current_reduc = ""
+      let current_model = ""
       setLatentViewState({
         longitude: 0,
         latitude: 0,
         zoom: 4,
         maxZoom: 20
       })
-        getMetaData(DZI_URL)
-        .then(tileSize => {
-          return defineMappingLatentPhysical(MODEL_URL,current_reduc,current_model, tileSize)
-            .then(mapping => {
-              setInitDataFetched(true);
-              return { metaData, mapping };
-            });
-        })
+      getMetaData(CONFIG_URL)
+      .then(([tileSize, DZI_URL, SLIDE_NAME, MODEL,REDUC_DIM]) => {
+        current_reduc = REDUC_DIM[0]
+        current_model = MODEL[0]
+        setGeneralData({ ROOT_URL, MODEL_URL,CONFIG_URL,current_reduc,current_model,DZI_URL,SLIDE_NAME,MODEL,REDUC_DIM }); 
+        return defineMappingLatentPhysical(MODEL_URL, current_reduc, current_model, tileSize)
+          .then(mapping => {
+            setInitDataFetched(true);
+            return { metaData, mapping };
+          });
+      })
         .then(({ metaData, mapping }) => {
           loadData(MODEL_URL, current_reduc, current_model)
             .then(layerData => {
@@ -156,22 +156,42 @@ const Display = () => {
       fetchData();
     }, [generalData,initDataFetched]);
 
-    const getMetaData = async (DZI_URL) => {
-      const response = await fetch(DZI_URL);
-      const xmlText = await response.text();
-      const dziXML = new DOMParser().parseFromString(xmlText, 'text/xml');
-
-
-      if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
-        console.warn('Overlap parameter is nonzero and should be 0');
+    const getMetaData = async (CONFIG_URL) => {
+      try {
+        // Récupérez le chemin d'accès depuis CONFIG_URL
+        const res = await fetch(CONFIG_URL);
+        const data = await res.json();
+        
+        // Utilisez l'approche précédente pour extraire le nom du fichier sans l'extension
+        const filePath = data.slide[0];
+        const parts = filePath.split('/');
+        const fileNameWithExtension = parts[parts.length - 1];
+        const fileNameWithoutExtension = fileNameWithExtension.slice(0, -4);
+        const model_name = data.model_name
+        const reduc_method = data.dimensionality_reduction
+        const DZI_URL = process.env.PUBLIC_URL + `output_data/tiling/${fileNameWithExtension}/info.dzi`;
+        const response = await fetch(DZI_URL);
+        const xmlText = await response.text();
+        const dziXML = new DOMParser().parseFromString(xmlText, 'text/xml');
+    
+        if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
+          console.warn('Overlap parameter is nonzero and should be 0');
+        }
+    
+        const height = Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value);
+        const width = Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value);
+        const tileSize = Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value);
+        
+        setMetaData({ height, width, tileSize });
+        
+        
+        return [tileSize,DZI_URL,fileNameWithoutExtension,model_name,reduc_method];
+      } catch (error) {
+        console.error('Une erreur s\'est produite :', error);
+        // Gérez l'erreur comme nécessaire
       }
-
-      const height = Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value);
-      const width = Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value);
-      const tileSize = Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value);
-      setMetaData({ height, width, tileSize });
-      return tileSize
-    }
+    };
+    
 
     const removeLastAnnotation = () => {
       const idLast = (dataManager.annotation)[dataManager.annotation.length-1].id
@@ -251,15 +271,14 @@ const Display = () => {
                      setLatentViewState={setLatentViewState}
                      loadTiles={loadTiles}
                      setLoadTiles={setLoadTiles}
-                    />
+                     generalData={generalData}
+                     />
                 </div>
             </div>
             <div className="parameter">
             <SettingsPanel
               settingsManager={settingsManager}
               setSettingsManager={setSettingsManager}
-              REDUC_DIM={REDUC_DIM}
-              MODEL={MODEL}
               generalData={generalData}
               setGeneralData={setGeneralData}
             />

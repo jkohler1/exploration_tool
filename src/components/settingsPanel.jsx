@@ -1,7 +1,7 @@
 // SettingsPanel.js
 import React from 'react';
 
-const SettingsPanel = ({ settingsManager, setSettingsManager,REDUC_DIM, MODEL, generalData, setGeneralData}) => {
+const SettingsPanel = ({ settingsManager, setSettingsManager,generalData, setGeneralData}) => {
   const handleSliderChange = (param, value) => {
     const newSettingsManager = { ...settingsManager, [param]: value };
     setSettingsManager(newSettingsManager);
@@ -10,13 +10,13 @@ const SettingsPanel = ({ settingsManager, setSettingsManager,REDUC_DIM, MODEL, g
     const newGeneralData = { ...generalData, [param]: value };
     setGeneralData(newGeneralData);
   };
-  const modelOptions = MODEL.map((modelName) => (
+  const modelOptions = generalData.MODEL.map((modelName) => (
     <option key={modelName} value={modelName}>
       {modelName}
     </option>
   ));
 
-  const reducOptions = REDUC_DIM.map((reducName) => (
+  const reducOptions = generalData.REDUC_DIM.map((reducName) => (
     <option key={reducName} value={reducName}>
       {reducName}
     </option>

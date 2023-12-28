@@ -4,7 +4,7 @@ import MainLatentLayer from './layer/mainLatentLayer';
 import EditableLayerComponent from './layer/editionLayer';
 import {getAllPointsInsideAnnotation,generateEmptyAnnotation} from '../../utils';
 
-export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDataManager,settingsManager,latentViewState,setLatentViewState,loadTiles,setLoadTiles}) {
+export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDataManager,settingsManager,latentViewState,setLatentViewState,loadTiles,setLoadTiles,generalData}) {
   
 
   //Required data for Edition Layer
@@ -30,12 +30,12 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
   }, [metaData]);
 
   useEffect(() => {
-    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles});
+    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData});
     setMainLayer(mainLayerComponent);
 }, [dataManager,settingsManager,latentViewState]);
 
 useEffect(() => {
-    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles});
+    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData});
     setMainLayer(mainLayerComponent);
 
 }, [loadTiles]);

@@ -16,7 +16,7 @@ function MainTileLayerComponent({ metaData, generalData}) {
     getTileData: async ({ index }) => {
       try {
         const { x, y, z } = index;
-        const data = await load(`${generalData.ROOT_URL}/tiling/test.svs/level_${16+z}/data/test.svs_tile_${x}_${y}.png`);
+        const data = await load(`${generalData.ROOT_URL}/tiling/${generalData.SLIDE_NAME}.svs/level_${16+z}/data/${generalData.SLIDE_NAME}.svs_tile_${x}_${y}.png`);
         return data;
       } catch (error) {
         console.error('Error loading tile:', error);

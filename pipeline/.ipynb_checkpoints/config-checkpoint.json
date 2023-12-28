@@ -1,0 +1,31 @@
+{
+  "project_dir": "/mnt/iribhm/people/jkohler/dev",
+  "id": "2023-10-04T15:09:11.073022",
+  "slide": [
+    "/mnt/iribhm/people/jkohler/dev/data/input/TCGA-EM-A2CQ-01Z-00-DX1.DD22D5B4-3638-44B3-8127-03458B2ABC4D.svs"
+  ],
+  "tile_phys_dir": "/mnt/iribhm/people/jkohler/dev/output_folder/tile_phys_dir_2023-10-04T15:09:11.073022",
+  "tile_latent_dir": "/mnt/iribhm/people/jkohler/dev/output_folder/tile_latent_dir_2023-10-04T15:09:11.073022",
+  "tile_size": 224,
+  "tile_resize": 224,
+  "seg": true,
+  "ndpi": false,
+  "processing_unit": "cuda:2",
+  "batch_size": 8,
+  "num_workers": 20,
+  "tiling_nw": 40,
+  "max_bg_frac": 0.5,
+  "model": null,
+  "suffix_folder": "svs",
+  "suffix_file": "csv",
+  "cell_size": 16,
+  "pc_sampled": 0.05,
+  "zoom": 0.5,
+  "set_seed": 520,
+  "len_name": 0,
+  "timm_model": null,
+  "dino_model": "vitb8",
+  "dino2_model": null,
+  "clip_model": null,
+  "npdi": false
+}
