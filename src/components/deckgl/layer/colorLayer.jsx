@@ -1,14 +1,24 @@
 import React from 'react';
 import { GeoJsonLayer } from '@deck.gl/layers';
-
+/**
+ * Function to generate data for the GeoJsonLayer.
+ * 
+ * @param {number} tileSize - The size of each tile.
+ * @param {Array} annotations - Array of annotation objects.
+ * @param {Object} settingsManager - Settings manager object.
+ * @returns {Array} Array of GeoJsonLayer instances.
+ */
 function generateData(tileSize, annotations,settingsManager) {
+    // Return an empty array if there are no annotations
   if (!annotations || annotations.length === 0) {
     return [];
   }
 
   const layers = [];
   annotations.forEach(annotation => {
+    // Process only if the annotation is set to be displayed
     if(annotation.display){
+      // Map each physical touch point to a GeoJSON Feature
       const features = annotation.physicalTouched.map(d => ({
         type: 'Feature',
         properties: {},

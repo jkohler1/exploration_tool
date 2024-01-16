@@ -4,10 +4,15 @@ import MainLatentLayer from './layer/mainLatentLayer';
 import EditableLayerComponent from './layer/editionLayer';
 import {getAllPointsInsideAnnotation,generateEmptyAnnotation} from '../../utils';
 
+/**
+ * LatentSpace component for rendering and interacting with the latent space visualization.
+ * 
+ * @param {Object} props - Props passed to the component.
+ */
 export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDataManager,settingsManager,latentViewState,setLatentViewState,loadTiles,setLoadTiles,generalData}) {
   
 
-  //Required data for Edition Layer
+  // State for the data required by the editable layer
   const [editedData, setEditedData] = useState({
     type: 'FeatureCollection',
     features: []
@@ -15,10 +20,10 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
 
   const [newFeature,setNewFeature] = useState(null)
 
-  //Layer
+  // Layer states
   const [mainLayer, setMainLayer] = useState(null);
   const [editionLayer, setEditionLayer] = useState(null);
-
+  // Effect hook to adjust the viewState based on image dimensions
   useEffect(() => {  
     if(metaData){
       // Adjust the viewState to center based on the image dimensions
@@ -28,23 +33,23 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
       });
     }
   }, [metaData]);
-
+  // Effect hook to initialize main layer
   useEffect(() => {
     const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData});
     setMainLayer(mainLayerComponent);
 }, [dataManager,settingsManager,latentViewState]);
-
+// Effect hook to update the main layer when tiles are loaded
 useEffect(() => {
     const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData});
     setMainLayer(mainLayerComponent);
 
 }, [loadTiles]);
-
+  // Effect hook to initialize the edition layer
   useEffect(() => {
       const editionLayer = EditableLayerComponent({activeTool,TOOLS,editedData, setEditedData,metaData,dataManager,setNewFeature});    
       setEditionLayer(editionLayer);
   }, [metaData, dataManager,TOOLS, activeTool,settingsManager]);
-
+  // Effect hook for handling new features (annotations)
   useEffect(()=>{
     if(newFeature!==null){
       const physicalElem = []

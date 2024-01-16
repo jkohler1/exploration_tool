@@ -4,10 +4,20 @@ import { TileLayer } from '@deck.gl/geo-layers';
 import { BitmapLayer } from '@deck.gl/layers';
 import { load } from '@loaders.gl/core';
 import { clamp } from '@math.gl/core';
+/**
+ * MainTileLayerComponent function to create a TileLayer .
+ * 
+ * @param {Object} metaData - Metadata containing information about the visualization.
+ * @param {Object} generalData - General data about the current environment and settings.
+ * @returns {TileLayer} A Deck.gl TileLayer for rendering histological tiles.
+ */
 function MainTileLayerComponent({ metaData, generalData}) {
+    // Return null if metaData is not available
   if (!metaData) return null;
 
+  // Creating a new TileLayer
   const layer = new TileLayer({
+    // Defining the size and range of the tiles
     tileSize: metaData.tileSize,
     minZoom: -8,
     maxZoom: 0,

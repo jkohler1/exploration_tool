@@ -11,8 +11,17 @@ import EditableLayerComponent from './layer/editionLayer';
 import GeoJsonColorTileLayer from './layer/colorLayer';
 
 
-
-
+/**
+ * PhysicalSpace component for rendering and interacting with the physical space visualization.
+ * 
+ * @param {Object} activeTool - The currently active tool for interaction.
+ * @param {Object} TOOLS - Collection of available tools.
+ * @param {Object} metaData - Metadata for the visualization.
+ * @param {Object} generalData - General data for the visualization.
+ * @param {Object} dataManager - Manager for data including annotations.
+ * @param {Function} setDataManager - Function to update dataManager state.
+ * @param {Object} settingsManager - Manager for various settings of the visualization.
+ */
 export default function PhysicalSpace({activeTool,TOOLS,metaData,generalData,dataManager,setDataManager,settingsManager}) {
   
   //view state
@@ -32,18 +41,20 @@ export default function PhysicalSpace({activeTool,TOOLS,metaData,generalData,dat
   const [mainLayer, setMainLayer] = useState(null);
   const [colorLayer, setColorLayer] = useState(null);
   const [editionLayer, setEditionLayer] = useState(null);
-
+  // Effect hook for initializing layers
   useEffect(() => {
     if (metaData && generalData) {
       const mainlayer = MainTileLayerComponent({ metaData, generalData});
       const editionLayer = EditableLayerComponent({activeTool,TOOLS,editedData, setEditedData,metaData,dataManager,setNewFeature});
       const geoJsonColorTileLayer = GeoJsonColorTileLayer({metaData,dataManager,settingsManager})
+      
+      // Updating state with the new layers
       setMainLayer(mainlayer);
       setColorLayer(geoJsonColorTileLayer);
       setEditionLayer(editionLayer);
     }
   }, [metaData, generalData, dataManager, TOOLS, activeTool,settingsManager]);
-
+  // Effect hook for handling new features (annotations)
   useEffect(()=>{
       if(newFeature!==null){
         const latentElem = []

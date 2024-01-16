@@ -6,8 +6,18 @@ import { CompositeLayer } from '@deck.gl/core';
 import { BitmapLayer, ScatterplotLayer,GeoJsonLayer } from '@deck.gl/layers';
 import { WebMercatorViewport } from '@deck.gl/core';
 import * as turf from '@turf/turf';
-class MainLatentLayer extends CompositeLayer {
 
+/**
+ * MainLatentLayer class for creating a composite layer in DeckGL to visualize latent space data.
+ */
+class MainLatentLayer extends CompositeLayer {
+  /**
+   * Function to get visible points within the current viewport.
+   * 
+   * @param {Object} viewState - The current view state of the DeckGL instance.
+   * @param {Array} layerData - Data points of the latent layer.
+   * @returns {Array} Array of data points that are visible in the current viewport.
+   */
   getVisiblePoints(viewState, layerData) {
     const { latitude, longitude, zoom, width, height } = viewState;
     const bounds = new WebMercatorViewport({ width, height, latitude, longitude, zoom }).getBounds();
@@ -32,7 +42,15 @@ class MainLatentLayer extends CompositeLayer {
     });
     return dataInsidePolygon;
   }
-
+  /**
+   * Function to load data based on zoom level.
+   * 
+   * @param {Array} data - Data points to be loaded.
+   * @param {Object} dataManager - Data manager object containing annotation data.
+   * @param {Object} settingsManager - Settings manager object.
+   * @param {Array} layers - Array to store generated layers.
+   * @param {Object} generalData - General data for the layer.
+   */
   loadDataZoom(data,dataManager,settingsManager,layers,generalData){
     if (data.length > 0) {
       data.forEach(dataPoint => {
@@ -40,19 +58,17 @@ class MainLatentLayer extends CompositeLayer {
         console.log(img)
         const TAILLE_COTE_CARRÉ = settingsManager.tileZoomSize;
         
-        // Recherche de l'annotation correspondante
+        // Search for corresponding annotation 
         const annotation = dataManager.annotation.find(annotation => 
           annotation.latentTouched &&
           annotation.latentTouched.some(item => item.filename === dataPoint.filename) &&
           annotation.display === true
         );
-  
-        // Couleur par défaut si l'annotation n'est pas trouvée
-        let color = [255, 0, 0];
+
           
         layers.push(new BitmapLayer({
           id: dataPoint.filename,
-          data: [dataPoint], // Vous devez passer une liste de données à BitmapLayer
+          data: [dataPoint], // list of datas 
           image: img,
           bounds: [
             dataPoint.umap_x - TAILLE_COTE_CARRÉ / 2,

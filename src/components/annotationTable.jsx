@@ -3,29 +3,43 @@ import { ChromePicker } from 'react-color';
 import {loadPredefinedData,generateEmptyAnnotation} from '../utils';
 import './displays.scss';
 
+/**
+ * AnnotationTable component for managing and displaying annotations.
+ * 
+ * @param {Object} dataManager - Object managing the current state of annotations.
+ * @param {Function} setDataManager - Function to update dataManager state.
+ * @param {Object} generalData - General data used in the component.
+ * @param {Object} metaData - Meta data used in the component.
+ */
 const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) => {
+    // State management for component-specific functionalities
   const [colorId, setColorId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editedName, setEditedName] = useState('');
   const [selectedColor, setSelectedColor] = useState({ r: 255, g: 255, b: 255, a: 1 });
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
 
+  // Function to start editing an annotation
   const startEditing = (id, name) => {
     setEditingId(id);
     setEditedName(name);
   };
 
+  // Function to handle removal of an annotation
   const handleRemoveAnnotation = (id) => {
     const updatedAnnotations = dataManager.annotation.filter(annotation => annotation.id !== id);
 
     const newDataManager = { ...dataManager, annotation: updatedAnnotations };
     setDataManager(newDataManager);
   };
+
+  // Function to cancel the editing of an annotation
   const cancelEditing = () => {
     setEditingId(null);
     setEditedName('');
   };
 
+  // Function to save changes after editing an annotation
   const saveChanges = (id) => {
     const updatedAnnotations = dataManager.annotation.map(annotation => {
       if (annotation.id === id) {
@@ -41,21 +55,25 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
     setEditedName('');
   };
 
+  // Function to handle color change in the color picker
   const handleChangeColor = (color) => {
     setSelectedColor(color.rgb);
   };
 
+  // Function to handle the color picker display
   const handleClickColor = (id) => {
     setColorId(id)
     setDisplayColorPicker(!displayColorPicker);
   };
 
+    // Function to handle the 'Enter' key press for saving changes
   const handleKeyPress = (e, id) => {
     if (e.key === 'Enter') {
       saveChanges(id);
     }
   };
 
+  // Function to save the selected color for an annotation
   const handleSaveColor = () => {
     const updatedAnnotations = dataManager.annotation.map(annotation => {
       if (annotation.id === colorId) {
@@ -69,13 +87,12 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
   
     setDisplayColorPicker(false);
   };
-
+  // Function to handle the creation of a blank annotation
   const handleBlankAnnotation = () => {
-    // Add logic for handling blank annotation
     const newDataManager = { ...dataManager, annotation: [] };
     setDataManager(newDataManager);
   };
-
+  // Function to load default annotations
   const handleDefaultAnnotation = () => {
     loadPredefinedData(generalData.MODEL_URL,generalData.current_model, dataManager)
     .then(annotationTab => {
@@ -89,7 +106,7 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
     });
    
 };
-
+  // Function to handle the import of annotations
   const handleImportAnnotation = (e) => {
     e.preventDefault();
 
@@ -115,8 +132,6 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
             importedGeoJSON.features.forEach(feature => {
               // Extrait les propriétés et la géométrie
               const { properties, geometry } = feature;
-
-              // Vous pouvez maintenant utiliser properties et geometry comme vous le souhaitez
               const name = properties.name;
               const color = properties.color;
               const display = properties.display;
@@ -162,7 +177,7 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
     });
     fileInput.click();
   };
-
+  // Function to handle the export of annotations
   const handleExportAnnotation = () => {
     // Create a GeoJSON object from annotations
     const geojson = {
@@ -257,7 +272,7 @@ const AnnotationTable = ({ dataManager, setDataManager ,generalData,metaData}) =
                 annotation.name
               )}
             </td>
-            <td>{annotation.latentTouched.length}</td>
+            <td>{annotation.latentTouched.length} ({((annotation.latentTouched.length / dataManager.model_data.length) * 100).toFixed(2)}%)</td>
             <td>
               <div
                 className="color-box"

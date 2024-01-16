@@ -1,7 +1,12 @@
 import React from 'react';
 import { DrawPolygonMode, DrawPointMode, DrawPolygonByDraggingMode } from '@nebula.gl/edit-modes';
 import { EditableGeoJsonLayer } from '@nebula.gl/layers';
-
+/**
+ * EditableLayerComponent to create an EditableGeoJsonLayer for interactive editing .
+ * 
+ * @param {Object} props - Props passed to the component.
+ * @returns {EditableGeoJsonLayer} A new EditableGeoJsonLayer.
+ */
 function EditableLayerComponent({
   activeTool,TOOLS,editedData, setEditedData,metaData,dataManager,setNewFeature
 }) {
