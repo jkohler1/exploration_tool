@@ -147,7 +147,7 @@ class MainLatentLayer extends CompositeLayer {
         radiusScale: settingsManager.pointSize,
         radiusMinPixels: settingsManager.minPointSize,
         getPosition: (d) => [d.umap_x, d.umap_y],
-        getFillColor: (d) => d.avg_color[0]
+        getFillColor: (d) => d.avg_color
       });
 
       layers.push(scatterplotLayer);

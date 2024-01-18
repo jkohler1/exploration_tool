@@ -17,6 +17,7 @@
     "fs": "^0.0.1-security",
     "luma.gl": "^7.3.2",
     "nebula.gl": "^1.0.4",
+    "node-dir": "^0.1.17",
     "node-sass": "^7.0.3",
     "react": "^18.2.0",
     "react-color": "^2.19.3",

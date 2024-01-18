@@ -19,7 +19,7 @@ export function getAllTilesInsideAnnotation(metaData, newFeature,dataManager) {
         const point = turf.point([centerX, centerY]);
   
         if (turf.booleanPointInPolygon(point, newFeature) && x in dataManager.mappingLatentPhysical.physicalToLatent && y in dataManager.mappingLatentPhysical.physicalToLatent[x]) {
-          // Créez une clé unique pour la tuile touchée
+          // create pk foreach tiles touched
           touchedData.push({ x: x * tileSize, y: y * tileSize });
         }
       }
@@ -41,25 +41,36 @@ export function getAllTilesInsideAnnotation(metaData, newFeature,dataManager) {
     }
     return touchedData;
   }
-  
-  export function loadData(MODEL_URL,current_reduc,current_model) {
-    return fetch(MODEL_URL+current_model+"/"+current_reduc+"_data.csv")
+  export function loadData(MODEL_URL, current_reduc, current_model) {
+    return fetch(MODEL_URL + current_model + "/" + current_reduc + "_data.csv")
       .then(response => response.text())
       .then(data => {
         const lines = data.split('\n');
         const layerData = lines.slice(1).map(line => {
-          const [filename, umap_x, umap_y,avg_color] = line.split(',');
-          let jsArray = [0, 128, 255]
-          if(avg_color !== undefined){
-            let correctedStringArray = avg_color.replace(/\s+/g, ',');
-            jsArray = JSON.parse(`[${correctedStringArray}]`);
+          // parse data
+          const parts = line.split(',');
+          const filename = parts[0];
+          const umap_x = parts[1];
+          const umap_y = parts[2];
+          // get avg_color
+          const avg_color = parts.slice(3).join(',');
+  
+          let jsArray = [0, 128, 255]; // default_value
+          if (avg_color) {
+            // formating avg_color
+            let correctedString = avg_color.replace(/^"|"$/g, '');
+            try {
+              jsArray = JSON.parse(correctedString);
+            } catch (e) {
+              console.error('Erreur lors du parsing de avg_color:', e);
+            }
           }
-          
+  
           return {
             filename,
             umap_x: parseFloat(umap_x),
             umap_y: parseFloat(umap_y),
-            avg_color:jsArray
+            avg_color: jsArray
           };
         });
         return layerData;
@@ -75,16 +86,27 @@ export function getAllTilesInsideAnnotation(metaData, newFeature,dataManager) {
       .then((response) => response.text())
       .then((data) => {
         const lines = data.split('\n');
+        
         const layerData = lines.slice(1).map((line) => {
-          const [umap_x, umap_y, cluster, filename, avg_color] = line.split(',');
-          if (cluster !== '-1' && cluster !== undefined) {
-            let jsArray = [0, 128, 255];
-  
-            if (avg_color !== undefined) {
-              let correctedStringArray = avg_color.replace(/\s+/g, ',');
-              jsArray = JSON.parse(`[${correctedStringArray}]`);
+        // parse data
+        const parts = line.split(',');
+        const filename = parts[3];
+        const umap_x = parts[0];
+        const umap_y = parts[1];
+        const cluster = parts[2];
+        // get avg_color
+        const avg_color = parts.slice(4).join(',');   
+        if (cluster !== '-1' && cluster !== undefined) {
+            let jsArray = [0, 128, 255]; // default_value
+            if (avg_color) {
+              // formating avg_color
+              let correctedString = avg_color.replace(/^"|"$/g, '');
+              try {
+                jsArray = JSON.parse(correctedString);
+              } catch (e) {
+                console.error('Erreur lors du parsing de avg_color:', e);
+              }
             }
-  
             return {
               filename,
               umap_x: parseFloat(umap_x),

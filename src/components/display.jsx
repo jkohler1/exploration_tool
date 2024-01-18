@@ -107,6 +107,7 @@ const Display = () => {
       .then(([tileSize, DZI_URL, SLIDE_NAME, MODEL, REDUC_DIM]) => {
           current_reduc = REDUC_DIM[0];
           current_model = MODEL[0];
+
           // Set general data state
           setGeneralData({ ROOT_URL, MODEL_URL, CONFIG_URL, current_reduc, current_model, DZI_URL, SLIDE_NAME, MODEL, REDUC_DIM });
           return defineMappingLatentPhysical(MODEL_URL, current_reduc, current_model, tileSize)
@@ -148,7 +149,7 @@ useEffect(() => {
           const mapping = await defineMappingLatentPhysical(generalData.MODEL_URL, generalData.current_reduc, generalData.current_model, metaData.tileSize);
           const layerData = await loadData(generalData.MODEL_URL, generalData.current_reduc, generalData.current_model);
           const newAnnotation = dataManager.annotation;
-
+          console.log(layerData)
           // Update annotations with new latent positions
           for (const currentAnnotation of newAnnotation) {
               const newLatentAnnotation = [];
@@ -206,9 +207,9 @@ const getMetaData = async (CONFIG_URL) => {
       const height = Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value);
       const width = Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value);
       const tileSize = Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value);
-
+      const zoom = Number(dziXML.getElementsByTagName('Image')[0].attributes.NbLvl.value);
       // Update metadata state with the extracted values
-      setMetaData({ height, width, tileSize });
+      setMetaData({ height, width, tileSize,zoom });
               // Return relevant data for further processing
               return [tileSize, DZI_URL, fileNameWithoutExtension, model_name, reduc_method];
             } catch (error) {

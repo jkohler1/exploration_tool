@@ -14,12 +14,11 @@ import { clamp } from '@math.gl/core';
 function MainTileLayerComponent({ metaData, generalData}) {
     // Return null if metaData is not available
   if (!metaData) return null;
-
   // Creating a new TileLayer
   const layer = new TileLayer({
     // Defining the size and range of the tiles
     tileSize: metaData.tileSize,
-    minZoom: -8,
+    minZoom: -metaData.zoom,
     maxZoom: 0,
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
     extent: [0, 0, metaData.width, metaData.height],
