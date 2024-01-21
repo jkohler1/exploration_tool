@@ -26,8 +26,8 @@ export default function PhysicalSpace({activeTool,TOOLS,metaData,generalData,dat
   
   //view state
   const [viewState, setViewState] = useState({
-    target: [13000, 13000, 0],
-    zoom: -4
+    target: [(metaData.height/2), (metaData.width/2)],
+    zoom: -metaData.zoom + 3
   });
 
   //Required data for Edition Layer

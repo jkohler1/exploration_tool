@@ -19,6 +19,7 @@ function generateData(tileSize, annotations,settingsManager) {
     // Process only if the annotation is set to be displayed
     if(annotation.display){
       // Map each physical touch point to a GeoJSON Feature
+      console.log(annotation.physicalTouched)
       const features = annotation.physicalTouched.map(d => ({
         type: 'Feature',
         properties: {},

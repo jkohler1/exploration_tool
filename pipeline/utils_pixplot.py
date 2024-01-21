@@ -74,7 +74,6 @@ def save_tiles_for_tiling(input_file, output_folder_tiles, filename, tile_size, 
     tiles = deepzoom.DeepZoomGenerator(slide, tile_size=tile_size, overlap=0, limit_bounds=False)
     x_range = tiles.level_tiles[level][0]
     y_range = tiles.level_tiles[level][1]
-    
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
         for x in range(x_range):
@@ -108,8 +107,6 @@ def save_tiles_for_max_lvl(input_file, output_folder_tiles, filename, tile_size,
         tiles = deepzoom.DeepZoomGenerator(slide, tile_size=tile_size, overlap=0, limit_bounds=False)
         x_range = range(segmentation.shape[1])
         y_range = range(segmentation.shape[0])
-        print(x_range)
-        print(y_range)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
             for x in x_range:
@@ -143,7 +140,7 @@ def is_on_edge(segmentation, n, m):
     
 
     # Écrire les informations dans un fichier
-def write_info_to_file(input_file, output_file,tile_size):
+def write_info_to_file(input_file, output_file,tile_size, nb_lvl):
     # Open the SVS file
     slide = ops.OpenSlide(input_file)
 
@@ -159,6 +156,7 @@ def write_info_to_file(input_file, output_file,tile_size):
         f.write('  Format="jpeg"\n')
         f.write('  Overlap="0"\n')
         f.write(f'  TileSize="{tile_size}"\n')
+        f.write(f'  NbLvl="{nb_lvl}"\n')
         f.write('>\n')
         f.write(f'  <Size \n    Height="{dimensions[1]}"\n    Width="{dimensions[0]}"\n  />\n')
         f.write('</Image>\n')

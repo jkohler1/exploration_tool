@@ -35,12 +35,12 @@ export default function LatentSpace({activeTool,TOOLS,metaData,dataManager,setDa
   }, [metaData]);
   // Effect hook to initialize main layer
   useEffect(() => {
-    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData});
+    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData,metaData});
     setMainLayer(mainLayerComponent);
 }, [dataManager,settingsManager,latentViewState]);
 // Effect hook to update the main layer when tiles are loaded
 useEffect(() => {
-    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData});
+    const mainLayerComponent = new MainLatentLayer({dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData,metaData});
     setMainLayer(mainLayerComponent);
 
 }, [loadTiles]);

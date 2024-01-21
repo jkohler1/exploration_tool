@@ -86,25 +86,25 @@ class ModelPixplot:
 
     
     def avg_color(self, image_path):
-            # Charger l'image avec OpenCV
-            img = cv2.imread(image_path)
-            # Convertir l'image en RGB (si elle est au format BGR)
-            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            # Calculer la couleur moyenne
-            avg_color = np.mean(img_rgb, axis=(0, 1)).astype(int)
-            return avg_color
+        # Charger l'image avec OpenCV
+        img = cv2.imread(image_path)
+        # Convertir l'image en RGB (si elle est au format BGR)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # Calculer la couleur moyenne
+        avg_color = np.mean(img_rgb, axis=(0, 1)).astype(int)
+        return avg_color.tolist()  # Convertir en liste
 
     def process_images_avg_color(self):
         start_time = time.time()
         new_image_path = os.path.join(self.tiles_path, "data")
         for filename in os.listdir(new_image_path):
-            if filename.endswith(".png"):  #verif png file
+            if filename.endswith(".png"):  # Verifier si c'est un fichier png
                 image_path = os.path.join(new_image_path, filename)
                 avg_color = self.avg_color(image_path)
                 self.dico_avg_color[filename] = avg_color
         end_time = time.time()
         execution_time = end_time - start_time
-        print(f"avg_color in {execution_time:.2f} seconds.")
+        print(f"avg_color calculée en {execution_time:.2f} secondes.")
         
     
     def generate_default_clustering(self,reduc_dim,output_clustering):

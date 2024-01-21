@@ -51,10 +51,10 @@ class MainLatentLayer extends CompositeLayer {
    * @param {Array} layers - Array to store generated layers.
    * @param {Object} generalData - General data for the layer.
    */
-  loadDataZoom(data,dataManager,settingsManager,layers,generalData){
+  loadDataZoom(data,dataManager,settingsManager,layers,generalData,metaData){
     if (data.length > 0) {
       data.forEach(dataPoint => {
-        const img = `output_data/tiling/${generalData.SLIDE_NAME}.svs/level_16/data/${dataPoint.filename}`;
+        const img = `output_data/tiling/${generalData.SLIDE_NAME}.svs/level_${metaData.zoom}/data/${dataPoint.filename}`;
         console.log(img)
         const TAILLE_COTE_CARRÉ = settingsManager.tileZoomSize;
         
@@ -125,17 +125,16 @@ class MainLatentLayer extends CompositeLayer {
 
 
   renderLayers() {
-    const { dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData } = this.props;
+    const { dataManager,settingsManager,latentViewState,loadTiles,setLoadTiles,generalData,metaData } = this.props;
     const layers = [];
     if(latentViewState.zoom >= 7 && loadTiles){
-      console.log(dataManager)
       const data = this.getVisiblePoints(latentViewState, dataManager.model_data);
-      this.loadDataZoom(data,dataManager,settingsManager,layers,generalData)
+      this.loadDataZoom(data,dataManager,settingsManager,layers,generalData,metaData)
       return layers;
     }
     if (latentViewState.zoom >= 9 && !loadTiles) {
       const data = this.getVisiblePoints(latentViewState, dataManager.model_data);
-      this.loadDataZoom(data,dataManager,settingsManager,layers,generalData)
+      this.loadDataZoom(data,dataManager,settingsManager,layers,generalData,metaData)
       return layers;
     }
     else{

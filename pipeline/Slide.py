@@ -63,10 +63,11 @@ class SlidePixplot:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
             dzi_file = os.path.join(self.output_folder,"info.dzi") #dzi file
-            write_info_to_file(self.input_file, dzi_file,self.tile_size)
-            
+            nb_lvl = (self.max_lvl - self.first_lvl)
+            write_info_to_file(self.input_file, dzi_file,self.tile_size, nb_lvl)
+            compteur_file = 0
             for current_lvl in range(self.first_lvl, self.max_lvl + 1):
-                output_folder_tiles = os.path.join(self.output_folder, f"level_{current_lvl}", "data") #mandatory bc we need intermediary folder for model
+                output_folder_tiles = os.path.join(self.output_folder, f"level_{compteur_file}", "data") #mandatory bc we need intermediary folder for model
                 mkdir_if_not_exist(output_folder_tiles)
                 if current_lvl == self.max_lvl:
                     output_model_tiles = os.path.join(self.output_folder, "model", "data") #mandatory bc we need intermediary folder for model
@@ -79,7 +80,7 @@ class SlidePixplot:
                 
                 future = executor.submit(save_tiles_for_tiling, self.input_file, output_folder_tiles, self.filename, self.tile_size, current_lvl)
                 futures.append(future)
-                    
+                compteur_file+=1    
 
             concurrent.futures.wait(futures)
                 
@@ -187,8 +188,6 @@ class SlidePixplot:
         r_lim = seg_copy.shape[0]
         c_lim = seg_copy.shape[1]
         r, c = np.where(seg_copy == True)
-        print(r,c)
-        print(r.size,c.size)
         count = 0
         bg_limit = bg_imgray_mean + constant_std*bg_imgray_std
         for i in range(r.size):

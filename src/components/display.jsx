@@ -149,7 +149,6 @@ useEffect(() => {
           const mapping = await defineMappingLatentPhysical(generalData.MODEL_URL, generalData.current_reduc, generalData.current_model, metaData.tileSize);
           const layerData = await loadData(generalData.MODEL_URL, generalData.current_reduc, generalData.current_model);
           const newAnnotation = dataManager.annotation;
-          console.log(layerData)
           // Update annotations with new latent positions
           for (const currentAnnotation of newAnnotation) {
               const newLatentAnnotation = [];
